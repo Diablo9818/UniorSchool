@@ -1,0 +1,14 @@
+string name;
+int age;
+string zodiac;
+
+Console.Write("Введите Ваше имя: ");
+name = Console.ReadLine();
+
+Console.Write("Введите Ваш возраст: ");
+age = Convert.ToInt32(Console.ReadLine());
+
+Console.Write("Введите Ваш знак зодиака: ");
+ zodiac = Console.ReadLine();
+
+Console.WriteLine($"Вас зовут {name},вам {age} лет, вы {zodiac}, и просто хороший человек!");
