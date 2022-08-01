@@ -1,0 +1,22 @@
+using System;
+
+namespace HomeWork
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int money;
+            float playerSpeed;
+            string playerName;
+            bool isPlayerJumping;
+            byte numberOfDogs;
+            char currency;
+            double jumpForce;
+            ulong gamePlayTime;
+            ushort enemyHealth;
+            sbyte roomTemperature;
+
+        }
+    }
+}
