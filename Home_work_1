@@ -11,7 +11,7 @@ namespace HomeWork
             string playerName;
             bool isPlayerJumping;
             byte numberOfDogs;
-            char currency;
+            char symbolOfCurrency;
             double jumpForce;
             ulong gamePlayTime;
             ushort enemyHealth;
