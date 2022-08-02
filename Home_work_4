@@ -1,0 +1,16 @@
+using System;
+
+namespace ConsoleApp10
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int allPictures = 52;
+            int picturesInSeries = 3;
+            int fullRows = allPictures / picturesInSeries;
+            int extraPictures = allPictures % picturesInSeries;
+            Console.WriteLine($"Полностью заполненных рядов: {fullRows}. Картинок сверх меры {extraPictures}.");
+        }
+    }
+}
