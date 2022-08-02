@@ -1,0 +1,19 @@
+using System;
+
+namespace ConsoleApp9
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string name = "Петров";
+           string corectName = "Я новичок";
+            string surname = "Александр";
+            Console.WriteLine(name + " " + surname);
+            corectName = surname;
+            surname = name;
+            name = corectName;
+            Console.WriteLine(name + " " + surname);
+        }
+    }
+}
