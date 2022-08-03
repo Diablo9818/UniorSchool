@@ -1,0 +1,19 @@
+using System;
+
+namespace ConsoleApp15
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int firstNumber = 5;
+            int step = 7;
+            int lastNumber = 100;
+
+           for(int i = firstNumber; i < lastNumber; i+=step)
+            {
+                Console.WriteLine(i);
+            }
+        }
+    }
+}
