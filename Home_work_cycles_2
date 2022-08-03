@@ -1,0 +1,23 @@
+using System;
+
+namespace ConsoleApp14
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string stopWord = "exit";
+            string userStopWord;
+
+            while (true)
+            {
+                Console.Write("Введите стоп-слово: ");
+                userStopWord = Console.ReadLine();
+                if(userStopWord == stopWord)
+                {
+                    break;
+                }
+            }
+        }
+    }
+}
