@@ -1,0 +1,25 @@
+using System;
+
+namespace ConsoleApp13
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string message;
+            int showTime;
+
+            Console.Write("Введите сообщение для вывода: ");
+            message = Console.ReadLine();
+
+            Console.Write("Сколько раз Вы хотите его вывести? ");
+            showTime = Convert.ToInt32(Console.ReadLine());
+
+            for(int i = showTime; i > 0; i--)
+            {
+                Console.WriteLine(message);
+            }
+
+        }
+    }
+}
