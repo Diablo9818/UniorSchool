@@ -1,0 +1,22 @@
+using System;
+
+namespace ConsoleApp16
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random rand = new Random();
+            int number = rand.Next(0, 101);
+            Console.WriteLine("Случайное число:" + number);
+            int sum = 0;
+
+            for(int i = 0; i< number; i += 5)
+            {
+                sum += i;
+            }
+
+            Console.WriteLine("Сумма:" + sum);
+        }
+    }
+}
