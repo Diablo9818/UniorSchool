@@ -15,10 +15,10 @@ namespace ConsoleApp13
             Console.Write("Сколько раз Вы хотите его вывести? ");
             showTime = Convert.ToInt32(Console.ReadLine());
 
-            while(showTime > 0)
+            for(int i = showTime; i > 0; i--)
             {
                 Console.WriteLine(message);
-                showTime--;
+
             }
 
         }
