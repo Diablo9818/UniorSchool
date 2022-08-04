@@ -1,0 +1,29 @@
+using System;
+
+namespace ConsoleApp16
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random random = new Random();
+            int maxValue = 101;
+            int firstDivider = 3;
+            int secondDivider = 5;
+            int number = random.Next(0, maxValue);
+            Console.WriteLine("Случайное число:" + number);
+            int sum = 0;
+
+            for(int i = 0; i< number; i ++)
+            {
+                if(i % firstDivider == 0 || i % secondDivider == 0)
+                {
+                    sum += i;
+                }
+
+            }
+
+            Console.WriteLine("Сумма:" + sum);
+        }
+    }
+}
