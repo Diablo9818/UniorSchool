@@ -1,0 +1,24 @@
+using System;
+
+namespace ConsoleApp16
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random random = new Random();
+            int upBorder = 101;
+            int step = 5;
+            int number = random.Next(0, upBorder);
+            Console.WriteLine("Случайное число:" + number);
+            int sum = 0;
+
+            for(int i = 0; i< number; i += step)
+            {
+                sum += i;
+            }
+
+            Console.WriteLine("Сумма:" + sum);
+        }
+    }
+}
