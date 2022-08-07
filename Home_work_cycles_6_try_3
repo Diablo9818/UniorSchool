@@ -1,0 +1,93 @@
+using System;
+
+namespace ConsoleApp19
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool isExit = false;
+            string writePassword = "password";
+            string userPassword;
+            string writeName = "name";
+            string userName;
+            string showPoetry = "Все объекты класса Кетер\nПодросли на целый метр.\nИ какой они длины?\n[ДАННЫЕ УДАЛЕНЫ]";
+            string consoleColorChanger;
+
+            Console.WriteLine("Добро пожаловать в это забавное приложение, пожалуйста, выберите команду:");
+
+            while (isExit == false)
+            {
+                Console.WriteLine("1 - установаить пароль.");
+                Console.WriteLine("2 - установить имя.");
+                Console.WriteLine("3 - прочитать стихотворение.");
+                Console.WriteLine("4 - изменить цвет консоли.");
+                Console.WriteLine("5 - выйти из программы.");
+                int userInput;
+                userInput = Convert.ToInt32(Console.ReadLine());
+
+                switch (userInput)
+                {
+                    case 1:
+                        Console.Write("Придумайте пароль: ");
+                        writePassword = Console.ReadLine();
+                        break;
+
+                    case 2:
+                        Console.Write("Придумайте имя: ");
+                        writeName = Console.ReadLine();
+                        break;
+                    
+                    case 3:
+                        Console.Write("Введите имя: ");
+                        userName = Console.ReadLine();
+
+                        if(userName == writeName)
+                        {
+                            Console.Write("Введите пароль:");
+                            userPassword = Console.ReadLine();
+
+                            if(userPassword == writePassword)
+                            {
+                                Console.WriteLine(showPoetry);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Неправильный пароль.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Неверное имя!");
+                        }
+                        break;
+
+                    case 4:
+                        Console.Write("Выберите один из трех цветов: зеленый, синий, красный.");
+                        consoleColorChanger = Console.ReadLine();
+
+                        switch (consoleColorChanger)
+                        {
+                            case "зеленый":
+                                Console.BackgroundColor = ConsoleColor.Green;
+                                break;
+
+                            case "синий":
+                                Console.BackgroundColor = ConsoleColor.Blue;
+                                break;
+
+                            case "красный":
+                                Console.BackgroundColor = ConsoleColor.Red;
+                                break;
+                        }
+                        break;
+                    
+                    case 5:
+                        isExit = true;
+                        break;
+
+                }
+            }
+        }
+    }
+}
