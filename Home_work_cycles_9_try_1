@@ -1,0 +1,24 @@
+using System;
+
+namespace ConsoleApp21
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random random = new Random();
+            int number = random.Next(0, 28);
+            int multipleCounter = 0;
+            int minValue = 100;
+            int maxValue = 999;
+
+            for (int i = minValue; i <= maxValue; i+=number)
+            {
+                    multipleCounter++;
+            }
+                
+            Console.WriteLine("Загаданное число: " + number);
+            Console.WriteLine("Количество кратных числе: " + multipleCounter); 
+        }
+    }
+}
