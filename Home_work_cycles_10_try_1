@@ -1,0 +1,27 @@
+using System;
+
+namespace ConsoleApp22
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random random = new Random();
+            int minValue = 0;
+            int maxValue = 100;
+            int secondNumber = random.Next(minValue, maxValue);
+            int number = 2;
+            int degree = 2;
+            int degreeCounter = 0;
+
+            while(number < secondNumber)
+            {
+                number *= degree;
+                degreeCounter ++;
+            }
+
+            Console.WriteLine("Заданное число: " + secondNumber);
+            Console.WriteLine("2 степени " + degreeCounter + " равно " + number + ".");
+        }
+    }
+}
