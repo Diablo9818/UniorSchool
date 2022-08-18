@@ -1,0 +1,74 @@
+using System;
+
+namespace ConsoleApp23
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int openBracket = 0;
+            int closeBracket = 0;
+            int bracketDeep = 0;
+            int bracketCount = 0;
+            bool isRight = true;
+
+            Console.Write("Введите строку: ");
+            string bracket = Console.ReadLine();
+
+            for(int i = 0; i < bracket.Length; i++)
+            {
+                if(bracket[i] == '(')
+                {
+                    bracketCount++;
+                    openBracket++;
+                    closeBracket--;
+
+                    if(closeBracket < 0)
+                    {
+                        closeBracket = 0;
+                    }
+                }
+
+                if (bracket[i] == ')')
+                {
+                    bracketCount--;
+                    openBracket--;
+                    closeBracket++;
+
+                    if (openBracket < 0)
+                    {
+                        openBracket = 0;
+                    }
+                }
+
+                if(bracketCount < 0)
+                {
+                    isRight = false;
+                }
+            }
+            if (bracketCount == 0 && isRight == true)
+            {
+                if(closeBracket > openBracket)
+                {
+                    bracketDeep = closeBracket;
+                }
+                else if (closeBracket < openBracket)
+                {
+                    bracketDeep = openBracket;
+                }
+                else if(closeBracket == openBracket)
+                {
+                    bracketDeep = openBracket;
+                }
+
+                Console.WriteLine("Строка верна!");
+                Console.WriteLine("Максимальная глубина строки: " + bracketDeep);
+            }
+            else if( isRight == false || bracketCount != 0)
+            {
+                Console.WriteLine("Строка неверна!");
+            }
+
+        }
+    }
+}
