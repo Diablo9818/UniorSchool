@@ -1,0 +1,40 @@
+using System;
+
+namespace ConsoleApp23
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int openBracketCount = 0;
+            int closeBracketCount = 0;
+
+            Console.Write("Введите строку: ");
+            string bracket = Console.ReadLine();
+            char[] brackets = bracket.ToCharArray();
+
+            for(int i = 0; i < brackets.Length; i++)
+            {
+                if(brackets[i] == '(')
+                {
+                    openBracketCount++;
+                }
+
+                if (brackets[i] == ')')
+                {
+                    closeBracketCount++;
+                }
+
+            }
+            if (openBracketCount == closeBracketCount & bracket[0] != ')')
+            {
+                Console.WriteLine("Строка верна!");
+                Console.WriteLine("Максимальная глубина строки: " + openBracketCount);
+            }
+            else
+            {
+                Console.WriteLine("Строка неверна!");
+            }
+        }
+    }
+}
