@@ -1,0 +1,126 @@
+using System;
+
+namespace ConsoleApp24
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int bossHealth = 100;
+            int bossAttack = 10;
+
+            int maxPlayerHealth = 70;
+            int playerHealth = 70;
+            int selfDamage = 5;
+            int fireDamage = 10;
+            bool isFireBallUsed = false;
+            int dragonDamage = 20;
+            bool isDragonCalled = false;
+            int phoenixDamage = 15;
+            int volcanoDamage = 25;
+            int selfVolcanoDamage = 10;
+            int herbMedication = 10;
+            int herbCount = 5;
+
+            while(playerHealth > 0 && bossHealth > 0)
+            {
+                Console.WriteLine("Выберите заклинание:\n1 - Атака огненными шарами.\n2 - Призыв дракона.\n3 - Призыв феникса.\n4 - Вулканический удар.\n5 - Вылечить себя.");
+                string playerChoose = Console.ReadLine();
+
+                switch (playerChoose)
+                {
+                    case "1":
+                        Console.WriteLine("Атака огненными шарами!");
+                        bossHealth -= fireDamage;
+                        isFireBallUsed = true;
+                        Console.WriteLine("Босс наносит удар!");
+                        playerHealth -= bossAttack;
+                        Console.WriteLine("Здоровье игрока: " + playerHealth);
+                        Console.WriteLine("Здоровье босса: " + bossHealth);
+                        break;
+
+                    case "2":
+
+                        if(isFireBallUsed == true)
+                        {
+                            Console.WriteLine("Вы призвали дракона Азара!");
+                            bossHealth -= dragonDamage;
+                            isDragonCalled = true;
+                            playerHealth -= selfDamage;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Нужно больше огня, милорд.");
+                        }
+
+                        Console.WriteLine("Босс наносит удар!");
+                        playerHealth -= bossAttack;
+                        Console.WriteLine("Здоровье игрока: " + playerHealth);
+                        Console.WriteLine("Здоровье босса: " + bossHealth);
+                        break;
+
+                    case "3":
+
+                        if (isDragonCalled == true)
+                        {
+                            Console.WriteLine("Вы призвали феникса!");
+                            bossHealth -= phoenixDamage;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Феникс не может появится.");
+                        }
+
+                        Console.WriteLine("Босс наносит удар!");
+                        playerHealth -= bossAttack;
+                        Console.WriteLine("Здоровье игрока: " + playerHealth);
+                        Console.WriteLine("Здоровье босса: " + bossHealth);
+                        break;
+
+                    case "4":
+                        Console.WriteLine("Вы пробудили древний вулкан! Да низвергнет он кару земную на головы ваших врагов!");
+                        bossHealth -= volcanoDamage;
+                        playerHealth -= selfVolcanoDamage;
+                        Console.WriteLine("Здоровье игрока: " + playerHealth);
+                        Console.WriteLine("Здоровье босса: " + bossHealth);
+                        Console.WriteLine("Босс наносит удар!");
+                        playerHealth -= bossAttack;
+                        break;
+
+                    case "5":
+
+                        if(playerHealth < maxPlayerHealth & herbCount > 0)
+                        {
+                            Console.WriteLine("Вы лечите себя.");
+                            playerHealth += herbMedication;
+                            herbCount--;
+                            Console.WriteLine($"У Вас осталось {herbCount} аптечек.");
+                        }
+                        if(herbCount == 0)
+                        {
+                            Console.WriteLine("Не хватает аптечек.");
+                        }
+
+                        Console.WriteLine("Здоровье игрока: " + playerHealth);
+                        Console.WriteLine("Здоровье босса: " + bossHealth);
+                        break;
+                }
+
+                Console.WriteLine(" ");
+            }
+
+            if (bossHealth <= 0)
+            {
+                Console.WriteLine("Вы выиграли! Босс повержен!");
+            }
+            else if (playerHealth <= 0)
+            {
+                Console.WriteLine("Вы проиграли!");
+            }
+            else if(bossHealth <= 0 && playerHealth <= 0)
+            {
+                Console.WriteLine("Ничья! Оба погибли.");
+            }
+        }
+    }
+}
