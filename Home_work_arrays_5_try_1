@@ -1,0 +1,43 @@
+using System;
+
+namespace ConsoleApp34
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random random = new Random();
+            int[] array = new int[30];
+            int maxValue = 4;
+            int minValue = 1;
+            int repeatCounter = 0;
+            int maxRepeatCounter = 0;
+            int maxNumber = 0;
+
+            for(int i = 0; i < array.Length; i++)
+            {
+                array[i] = random.Next(minValue, maxValue);
+                Console.Write(array[i] + " ");
+            } 
+
+            for(int i = 0; i < array.Length-1; i++)
+            {
+                if(array[i] == array[i+1])
+                {
+                    repeatCounter++;
+                }
+               if(maxRepeatCounter <= repeatCounter)
+                {
+                    maxRepeatCounter = repeatCounter;
+                    maxNumber = array[i];
+                }
+                else
+                {
+                    repeatCounter = 0;
+                } 
+            }
+
+            Console.WriteLine($"Количество повторений: {repeatCounter}. Число, повторяющееся больше всех: {maxNumber}.");
+        }
+    }
+}
