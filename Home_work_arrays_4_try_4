@@ -1,0 +1,54 @@
+using System;
+
+namespace ConsoleApp33
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int [] array = new int[0];
+            bool isRunning = true;
+            string userComand;
+            string exitProgramm = "exit";
+            string summArray = "sum";
+
+            Console.WriteLine("Список команд: "+ summArray + "- найти сумму введенных чисел. " + exitProgramm + "- выйти из программы.");
+
+            while (isRunning)
+            {
+                Console.WriteLine("Введите команду или число:");
+                userComand = Console.ReadLine();
+
+                if(userComand.ToLower() == summArray.ToLower())
+                {
+                    int sum = 0;
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        sum += array[i];
+                    }
+
+                    Console.WriteLine("Сумма массива: " + sum);
+                }
+                else if (userComand.ToLower() == exitProgramm.ToLower())
+                {
+                    isRunning = false;
+                    Console.WriteLine("Программа завершена! Приятного вечера.");
+                }
+                else
+                {
+                    int userInput = Convert.ToInt32(userComand);
+                    int[] tempArray = new int[array.Length + 1];
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        tempArray[i] = array[i];
+                    }
+
+                    tempArray[tempArray.Length - 1] = userInput;
+                    array = tempArray;
+                }
+            }
+        }
+    }
+}
