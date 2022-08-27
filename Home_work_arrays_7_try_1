@@ -1,0 +1,18 @@
+using System;
+
+namespace ConsoleApp36
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string funnyPoem = "На моей бронемашине отказал пустотный щит! Техножрец махнул кадилом - Император защитит!";
+            string[] array = funnyPoem.Split(' ');
+
+            foreach(string word in array)
+            {
+                Console.WriteLine(word);
+            }
+        }
+    }
+}
