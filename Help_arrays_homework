@@ -1,0 +1,44 @@
+using System;
+
+namespace ConsoleApp38
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int[] array = new int[] { 1, 2, 3, 4, 5 };
+            Console.WriteLine("Исходный массив:");
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                Console.Write(array[i] + " ");
+            }
+
+            Console.WriteLine();
+
+            Console.Write("Введите число сдвигов влево: ");
+            int userInput = Convert.ToInt32(Console.ReadLine());
+
+            for (int i = 0; i < userInput; i++)
+            {
+                int lastNumber = array[array.Length - 1];
+
+                for (int j = array.Length-1; j > 0; j--)
+                {
+                    array[j] = array[j - 1];
+                }
+
+                array[0] = lastNumber;
+            }
+
+            Console.WriteLine("Новый массив: ");
+            for (int i = 0; i < array.Length; i++)
+            {
+                Console.Write(array[i]+ " ");
+            }
+
+            Console.WriteLine();
+            Console.ReadKey();
+        }
+    }
+}
