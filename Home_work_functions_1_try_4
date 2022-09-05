@@ -1,0 +1,140 @@
+using System;
+
+namespace ConsoleApp40
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            const int AddFileComandNumber = 1;
+            const int ShowFileComandNumber = 2;
+            const int DeleteFileComandNumber = 3;
+            const int FindFileComandNumber = 4;
+            const int EndProgramComandNumber = 5;
+
+            bool isWorking = true;
+            string[] names = new string[] { "Петров Вовочка Сидорович", "Ржевский Дмитрий Иванович ", "Штирлиц Макс Отто", "Мюллер [Засекречено] [Засекречено] " };
+            string[] jobs = new string[] { "Школьник", "Поручик", "Разведчик", "Группенфюррер" };
+
+            Console.WriteLine("Список команд: \n1 - добавить досье. \n2 - вывести все досье. \n3 - удалить досье. \n4 - поиск по фамилии. \n5 - выход.");
+
+            while (isWorking)
+            {
+                Console.Write("\nВведите команду: ");
+                int userComandInput = Convert.ToInt32(Console.ReadLine());
+
+                switch (userComandInput)
+                {
+                    case AddFileComandNumber:
+                        AddFile( ref names,ref jobs);
+                        break;
+                    case ShowFileComandNumber:
+                        ShowFile(names, jobs);
+                        break;
+                    case DeleteFileComandNumber:
+                        DeleteFile(ref names, ref jobs);
+                        break;
+                    case FindFileComandNumber:
+                        FindFile(ref names, ref jobs);
+                        break;
+                    case EndProgramComandNumber:
+                        isWorking = false;
+                        break;
+                }
+            }
+        }
+
+        static void AddFile(ref string[] names, ref string[] jobs)
+        {
+            Console.Write("Введите фамилию:");
+            string userInputName = Console.ReadLine();
+            AddFile(userInputName, ref names);
+            Console.Write("Введите должность: ");
+            string userInputJob = Console.ReadLine();
+            AddFile(userInputJob, ref jobs);
+        }
+
+        static void DeleteFile(ref string[] names, ref string[] jobs)
+        {
+            Console.Write("Введите номер досье, которое Вы хотите удалить: ");
+            int deleteNumberFile = Convert.ToInt32(Console.ReadLine());
+            DeleteFile(ref names, deleteNumberFile);
+            DeleteFile(ref jobs, deleteNumberFile);
+            Console.WriteLine("Досье удалено");
+        }
+
+        static void FindFile(ref string[] names, ref string[] jobs)
+        {
+            Console.Write("Введите фамилию того, чье досье Вы хотите найти: ");
+            string userFindName = Console.ReadLine();
+            FindFile(userFindName, names, jobs);
+        }
+
+        static void ShowFile(  string [] names,  string [] jobs)
+        {
+            Console.WriteLine();
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                int number = i + 1;
+                Console.WriteLine(number +". "+ names[i] + " - " + jobs[i]);
+            }
+        }
+
+        static void AddFile(string userInputName, ref string[] names)
+        {
+            string[] tempNames = new string[names.Length + 1];
+
+            for(int i = 0; i < names.Length; i++)
+            {
+                tempNames[i] = names[i];
+            }
+
+            tempNames[tempNames.Length - 1] = userInputName;
+            names = tempNames;
+        }
+
+        static void DeleteFile( ref string[] names, int deleteNumber)
+        {
+            int index = deleteNumber - 1;
+            string[] tempNames = new string[names.Length - 1];
+
+            for(int i = 0; i < index; i++)
+            {
+                tempNames[i] = names[i];
+            }
+
+            for(int i = index + 1; i < names.Length; i++)
+            {
+                tempNames[i - 1] = names[i];
+            }
+
+            names = tempNames;
+        }
+
+        static void FindFile( string userFindName, string[] names, string[] jobs)
+        {
+            bool isExist = false;
+
+            for(int i = 0; i< names.Length; i++)
+            {
+                names[i].ToLower();
+                userFindName.ToLower();
+
+                if (names[i].ToLower().Contains(userFindName.ToLower()))
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Досье найдено: "+ names[i] + " - " + jobs[i]);
+                    isExist = true;
+                }
+
+            }
+
+            if(isExist == false)
+            {
+                Console.WriteLine("Человек с такой фамилией не найден.");
+            }
+ 
+        }
+    }
+}
