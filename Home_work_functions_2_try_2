@@ -1,0 +1,41 @@
+using System;
+
+namespace ConsoleApp43
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int maxHealth = 10;
+            int health = 5;
+            char healthSymbol = '#';
+            int userX = 0;
+            int userY = 15;
+
+            DrawBar(health, maxHealth, healthSymbol, userX,userY);
+        }
+
+        static void DrawBar(int value, int maxValue, char symbol, int userX, int userY)
+        {
+            string bar ="";
+
+            for(int i = 0; i < value; i++)
+            {
+                bar += symbol.ToString();
+            }
+
+            Console.SetCursorPosition(userX, userY);
+            Console.Write('[');
+            Console.Write(bar);
+
+            bar = "";
+
+            for(int i = value; i < maxValue; i++)
+            {
+                bar += '_';
+            }
+
+            Console.Write( bar + ']');
+        }
+    }
+}
