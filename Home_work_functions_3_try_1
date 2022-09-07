@@ -1,0 +1,33 @@
+using System;
+
+namespace ConsoleApp44
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            AskForNumber();
+        }
+
+        static void AskForNumber()
+        {
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.Write("Введите число: ");
+                int number;
+                string userInputNumber = Console.ReadLine();
+                bool success = int.TryParse(userInputNumber, out number);
+
+                if (success)
+                {
+                    Console.WriteLine("Поздравляю! Программа завершена!");
+                    isWork = false;
+                    Console.ReadKey();
+                }
+            }
+
+        }
+    }
+}
