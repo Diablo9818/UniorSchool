@@ -1,0 +1,53 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp47
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Dictionary<string, string> wordsMeaning = new Dictionary<string, string>()
+            {
+                {"Мажоритарный","-ая, -ое: мажоритарная система (спец.) - система выборов,при к-рой в число избранных попадают лишь кандидаты партии, получившей большинство голосов в данном округе." },
+                {"Вандал","-а м. Разрушитель культуры, варвар [по названию воинственныхдрев-негерманских племен, разрушивших Рим и уничтоживших его культурныеценности]." },
+                {"Обрат","-а, м. Отход, получаемый после переработки молока." },
+                { "Юань","-я, м. Денежная единица в Китае."}
+            };
+
+            bool isWorking = true;
+
+            while (isWorking)
+            {
+                Console.Write("Введите слово, значение которого хотите узнать: ");
+                string userInputWord = Console.ReadLine();
+
+                FindWord(userInputWord, wordsMeaning);
+
+            }
+        }
+
+        static void FindWord(string userInputWord, Dictionary<string,string> wordsMeaning)
+        {
+            bool isFind = false;
+
+            foreach (var word in wordsMeaning)
+            {
+                if (userInputWord.ToLower() == word.Key.ToLower())
+                {
+                    Console.WriteLine($"{word.Key} : {word.Value}");
+                    isFind = true;
+
+                }
+
+            }
+
+            if (isFind == false)
+            {
+                Console.WriteLine("Такого слова тут нет.");
+            }
+
+            Console.WriteLine();
+        }
+    }
+}
