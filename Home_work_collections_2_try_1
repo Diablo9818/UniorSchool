@@ -1,0 +1,25 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp48
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var purchaseAmountList = new List<int> { 45, 23, 1050, 2564, 450, 21, 49 };
+            Queue<int> purchaseAmount = new Queue<int>(purchaseAmountList);
+            int totalIncome = 0;
+
+            while(purchaseAmount.Count > 0)
+            {
+                Console.Clear();
+                int purchase = purchaseAmount.Dequeue();
+                totalIncome += purchase;
+
+                Console.WriteLine($"Сумма покупки составила: {purchase}, всего заработано: {totalIncome}.");
+                Console.ReadKey();
+            }
+        }
+    }
+}
