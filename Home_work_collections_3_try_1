@@ -1,0 +1,47 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp49
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int sum = 0;
+            const string ComandSum = "sum";
+            const string ComandExit = "exit";
+            bool isWorking = true;
+            List<int> numbers = new List<int>();
+
+            Console.WriteLine("Введите число либо команду. Команды: sum - узнать сумму введенных чисел, exit - выйти из программы. ");
+
+            while (isWorking)
+            {
+                string userInput = Console.ReadLine();
+                int userNumber;
+                bool isNumber = int.TryParse(userInput, out userNumber);
+
+                if (isNumber)
+                {
+                    numbers.Add(userNumber);
+                }
+
+                if(userInput.ToLower() == ComandSum)
+                {
+                    for(int i = 0; i < numbers.Count; i++)
+                    {
+                        sum += numbers[i];
+                    }
+
+                    Console.WriteLine($"Сумма введеных чисел равна: {sum}");
+                }
+
+                if (userInput.ToLower() == ComandExit)
+                {
+                    isWorking = false;
+                    Console.WriteLine("Работа программы завершена.");
+                }
+            }
+        }
+    }
+}
