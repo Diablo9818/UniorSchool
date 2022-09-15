@@ -1,0 +1,70 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp50
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Dictionary<string, string> employers = new Dictionary<string, string>();
+
+            bool isWorking = true;
+            const int AddFileComand = 1;
+            const int ShowAllFilesComand = 2;
+            const int DeleteFileComand = 3;
+            const int ExitComand = 4;
+
+            Console.WriteLine("Список команд: \n1 - добавить досье, \n2 - вывести все досье, \n3 - удалить досье, \n4 - выход.");
+
+            while (isWorking)
+            {
+                Console.Write("Введите команду: ");
+                int userInputComand = Convert.ToInt32(Console.ReadLine());
+
+                switch (userInputComand)
+                {
+                    case AddFileComand:
+                        AddFile(employers);
+                        break;
+                    case ShowAllFilesComand:
+                        ShowAllFiles(employers);
+                        break;
+                    case DeleteFileComand:
+                        DeleteFile(employers);
+                        break;
+                    case ExitComand:
+                        isWorking = false;
+                        break;
+                }
+            }
+        }
+
+        static void AddFile(Dictionary<string, string> employers)
+        {
+            Console.Write("Введите ФИО: ");
+           string userInputName = Console.ReadLine();
+            Console.Write("Введите должность: ");
+           string userInputJob = Console.ReadLine();
+            employers.Add(userInputName, userInputJob);
+            Console.WriteLine("Досье успешно добавлено!");
+
+        }
+
+        static void ShowAllFiles(Dictionary<string, string> employers)
+        {
+            foreach(var employer in employers)
+            {
+                Console.WriteLine($"{employer.Key} - {employer.Value}");
+            }
+        }
+
+        static void DeleteFile(Dictionary<string, string> employers)
+        {
+            Console.Write("Введите ФИО того, чье досье Вы хотите удалить:");
+            string userInputName = Console.ReadLine();
+            employers.Remove(userInputName);
+            Console.WriteLine("Досье успешно удалено!");
+        }
+    }
+}
