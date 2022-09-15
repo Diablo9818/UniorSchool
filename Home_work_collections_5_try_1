@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp52
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string[] firstArray = { "1", "2", "2" };
+            string[] secondArray = { "3", "2", "4" };
+
+            List<string> unitedArray = UniteArrays(firstArray, secondArray);
+        }
+
+        static List<string> UniteArrays(string[] fistArray, string[] secondArray)
+        {
+            List<string> tempList = new List<string>();
+            CheckDuplicates(tempList, fistArray);
+            CheckDuplicates(tempList, secondArray);
+
+            return tempList;
+        }
+
+        static void CheckDuplicates(List<string> tempList, string[] anotherArray)
+        {
+            foreach (string number in anotherArray)
+            {
+                if (tempList.Contains(number) == false)
+                {
+                    tempList.Add(number);
+                    Console.Write(number + " ");
+                }
+            }
+        }
+    }
+}
+
