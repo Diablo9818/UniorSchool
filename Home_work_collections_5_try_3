@@ -1,0 +1,26 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp52
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string[] firstArray = { "1", "2", "2" };
+            string[] secondArray = { "3", "2", "4" };
+
+            List<string> unitedArray = new List<string>();
+            unitedArray.AddRange(firstArray);
+            unitedArray.AddRange(secondArray);
+
+            HashSet<string> finalArray = new HashSet<string>(unitedArray);
+          
+            foreach(string number in finalArray)
+            {
+                Console.Write(number + " ");
+            }
+
+        }
+    }
+}
