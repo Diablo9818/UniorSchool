@@ -1,0 +1,31 @@
+using System;
+
+namespace ConsoleApp54
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Player player = new Player();
+            player.ShowInfo();
+        }
+    }
+
+    class Player
+    {
+        protected int Level;
+        protected int Health;
+        protected int Speed;
+        protected int JumpForce;
+
+        public Player()
+        {
+
+        }
+
+        public void ShowInfo()
+        {
+            Console.Write($"Уровень: {Level}, здоровье:{Health}, скорость:{Speed}, сила прыжка:{JumpForce}");
+        }
+    }
+}
