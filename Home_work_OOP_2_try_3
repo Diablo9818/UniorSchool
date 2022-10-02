@@ -1,0 +1,36 @@
+using System;
+
+namespace ConsoleApp55
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Renderer renderer = new Renderer();
+
+            Player player = new Player();
+            renderer.DrawPlayer(player.PositionX, player.PositionY);
+        }
+    }
+
+    class Player
+    {
+        public int PositionX { get; private set; } = 5;
+
+        public int PositionY { get; private set; } = 5;
+
+        public Player()
+        {
+
+        }
+    }
+
+    class Renderer
+    {
+        public void DrawPlayer(int positionX, int positionY, char playerSymbol = '@')
+        {
+            Console.SetCursorPosition(positionX, positionY);
+            Console.Write(playerSymbol);
+        }
+    }
+}
