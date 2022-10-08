@@ -1,0 +1,196 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp57
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            ComputerClub computerClub = new ComputerClub(8);
+            computerClub.Works();
+        }
+    }
+
+    class ComputerClub
+    {
+        private int _money = 0;
+        private List<Computer> _computers = new List<Computer>();
+        private Queue<Schoolboy> _schoolboys = new Queue<Schoolboy>();
+
+        public ComputerClub(int ComputerCount)
+        {
+            Random random = new Random();
+
+            for (int i = 0; i < ComputerCount; i++)
+            {
+                _computers.Add(new Computer(random.Next(1,15)));
+            }
+
+            CreateNewSchoolboy(25);
+        }
+
+        private void CreateNewSchoolboy(int count)
+        {
+            Random random = new Random();
+
+            for (int i = 0; i < count; i++)
+            {
+                _schoolboys.Enqueue(new Schoolboy(random.Next(100,300)));
+            }
+        }
+
+        public void Works()
+        {
+            while(_schoolboys.Count > 0)
+            {
+                Console.WriteLine($"У компьютерного клуба {_money} рублей.");
+
+                Schoolboy schoolboy = _schoolboys.Dequeue();
+                Console.WriteLine($"В очереди молодой человек. Он хочет купить {schoolboy.DesiredMinutes} минут.");
+                Console.WriteLine("\nСписок компьютеров:");
+                ShowAllComputers();
+
+                Console.WriteLine("Для того, чтобы идти к следующему клиенту нажмите любую клавишу.");
+     
+                Console.WriteLine("Вы предлагаете ему компьютер под номером: ");
+                int computerNumber;
+                bool isCorrectNumber = int.TryParse(Console.ReadLine(), out computerNumber);
+
+                if (isCorrectNumber)
+                {
+                    if(computerNumber >= 0 && computerNumber < _computers.Count)
+                    {
+                        if (_computers[computerNumber].IsBusy)
+                        {
+                            Console.WriteLine("Компьютер занят. Клиент ушел.");
+                        }
+                        else
+                        {
+                            if (schoolboy.CheckSolvency(_computers[computerNumber]))
+                            {
+                               _money +=schoolboy.ToPay();
+                                _computers[computerNumber].TakePlace(schoolboy);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Нужно больше золота!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Вы сами не понимаете, за какой ПК его посадить. Клиент ушел.");
+                    }
+                }
+                else
+                {
+                    Console.Write("Некорректное значение.");
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+                SkipMinutes();
+            }
+        }
+
+        public void SkipMinutes()
+        {
+            foreach (var computer in _computers)
+            {
+                computer.SkipMinutes();
+            }
+        }
+
+        private void ShowAllComputers()
+        {
+            for (int i = 0; i < _computers.Count; i++)
+            {
+                Console.Write($"{i} - ");
+                _computers[i].ShowInfo();
+            }
+        }
+    }
+
+    class Computer
+    {
+        private Schoolboy _schoolboy;
+        private int _minutesLeft;
+        public int PriceForMinutes { get; private set; }
+        public bool IsBusy
+        {
+            get
+            {
+                return _minutesLeft > 0;
+            }
+        }
+        public Computer(int priceForMinutes)
+        {
+             PriceForMinutes = priceForMinutes;
+        }
+
+        public void TakePlace(Schoolboy schoolboy)
+        {
+            _schoolboy = schoolboy;
+            _minutesLeft = schoolboy.DesiredMinutes;
+        }
+
+        public void FreePlace()
+        {
+            _schoolboy = null;
+        }
+
+        public void SkipMinutes()
+        {
+            _minutesLeft--;
+        }
+
+        public void ShowInfo()
+        {
+            if (IsBusy)
+            {
+                Console.WriteLine($"Компьютер занят. Осталось {_minutesLeft} минут.");
+            }
+            else
+            {
+                Console.WriteLine($"Компьютер свободен. Цена за минуту: {PriceForMinutes}.");        
+            }
+        }
+    }
+
+    class Schoolboy
+    {
+        private int _money;
+        private int _moneyToPay;
+        public int DesiredMinutes { get; private set; }
+
+        public Schoolboy(int money)
+        {
+            Random random = new Random();
+            _money = money;
+            DesiredMinutes = random.Next(10, 30);
+        }
+
+        public bool CheckSolvency(Computer computer)
+        {
+            _moneyToPay = computer.PriceForMinutes * DesiredMinutes;
+
+            if(_money >= _moneyToPay)
+            {
+                return true;
+            }
+            else
+            {
+                _moneyToPay = 0;
+                return false;
+            }
+        }
+
+        public int ToPay()
+        {
+            _money -= _moneyToPay;
+            return _moneyToPay;
+
+        }
+    }
+}
