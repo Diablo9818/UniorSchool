@@ -1,0 +1,227 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp56
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            const int FirstCommand = 1;
+            const int SecondCommand = 2;
+            const int ThirdCommand = 3;
+            const int FourthCommand = 4;
+            const int FifthCommand = 5;
+            const int SixthCommand = 6;
+
+            string menu = "1 - Вывеси список игроков." + "\n2 - Добавить игрока." + "\n3 - Заблокировать игрока." + "\n4 - Разблокировать игрока." + "\n5 - Удалить игрока." + "\n6 - Выход";
+            bool isWork = true;
+            DataBase dataBase = new DataBase();
+
+            while (isWork)
+            {
+                Console.WriteLine("Список команд:");
+                Console.WriteLine(menu);
+                Console.Write("\nВведите команду:");
+                int userInputCommand;
+                bool isCorrect = int.TryParse(Console.ReadLine(), out userInputCommand);
+
+                if (isCorrect)
+                {
+                    switch (userInputCommand)
+                    {
+                        case FirstCommand:
+                            dataBase.ShowDataBase();
+                            break;
+                        case SecondCommand:
+                            dataBase.AddPlayer();
+                            break;
+                        case ThirdCommand:
+                            dataBase.LockPlayer();
+                            break;
+                        case FourthCommand:
+                            dataBase.UnlockPlayer();
+                            break;
+                        case FifthCommand:
+                            dataBase.DeletePlayer();
+                            break;
+                        case SixthCommand:
+                            isWork = false;
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Неправильно введена команда.");
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+
+        }
+    }
+
+    class Player
+    {
+        public string PlayerNick { get; private set; }
+        public int PlayerID { get; private set; }
+        public int PlayerLevel { get; private set; }
+        public bool IsBanned { get; private set; }
+
+        public Player(string playerNick, int playerID, int playerLevel, bool isBanned )
+        {
+            PlayerNick = playerNick;
+            PlayerID = playerID;
+            PlayerLevel = playerLevel;
+            IsBanned = isBanned;
+        }
+
+        public void Ban()
+        {
+            IsBanned = true;
+        }
+        
+        public void UnBan()
+        {
+            IsBanned = false;
+        }
+        public void ShowPlayerInfo()
+        {
+            string status;
+
+            if(IsBanned == true)
+            {
+                status = "Забанен";
+            }
+            else
+            {
+                status = "Разбанен";
+            }
+            Console.WriteLine($"Номер игрока:{PlayerID}, имя игрока:{PlayerNick}, уровень игрока:{PlayerLevel}, статус игрока:{status}.");
+        }
+    }
+
+    class DataBase
+    {
+        private List<Player> _players = new List<Player>();
+
+        public void ShowDataBase()
+        {
+            if(_players.Count > 0)
+            {
+                for (int i = 0; i < _players.Count; i++)
+                {
+                    _players[i].ShowPlayerInfo();
+                }
+            }
+            else
+            {
+                Console.WriteLine("В базе данных нет ни одного игрока.");
+            }
+        }
+        public void AddPlayer()
+        {
+            Console.Write("Введите номер игрока:");
+            int playerID;
+            bool isCorrectID = int.TryParse(Console.ReadLine(), out playerID);
+
+            if (isCorrectID == false)
+            {
+                Console.WriteLine("Некорректный номер.");
+            }
+
+            Console.Write("Введите имя игрока: ");
+            string playerName = Console.ReadLine();
+
+            Console.Write("Введите уровень игрока: ");
+            int playerLevel;
+            bool isCorrectLevel = int.TryParse(Console.ReadLine(), out playerLevel);
+
+            if(isCorrectLevel == false)
+            {
+                Console.WriteLine("Некорректный номер.");
+            }
+
+            Console.Write("Забанен ли игрок?");
+            bool isBanned = Convert.ToBoolean(Console.ReadLine());
+
+            _players.Add(new Player(playerName, playerID, playerLevel, isBanned));
+
+        }
+
+        public void LockPlayer()
+        {
+            ShowDataBase();
+            Console.Write("\nВведите номер игрока, которого надо заблокировать:");
+            int blockNumber;
+            bool isCorrectBlockNumber = int.TryParse(Console.ReadLine(), out blockNumber);
+
+            if (isCorrectBlockNumber)
+            {
+                foreach (var player in _players)
+                {
+                    if(player.PlayerID == blockNumber && player.IsBanned == false)
+                    {
+                        player.Ban();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Такого игрока тут нет.");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Некорректный номер.");
+            }
+        }
+
+        public void UnlockPlayer()
+        {
+            ShowDataBase();
+            Console.Write("\nВведите номер игрока, которого надо разблокировать:");
+            int blockNumber;
+            bool isCorrectBlockNumber = int.TryParse(Console.ReadLine(), out blockNumber);
+
+            if (isCorrectBlockNumber)
+            {
+                foreach (var player in _players)
+                {
+                    if (player.PlayerID == blockNumber && player.IsBanned == true)
+                    {
+                        player.UnBan();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Такого игрока тут нет.");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Некорректный номер.");
+            }
+        }
+
+        public void DeletePlayer()
+        {
+            ShowDataBase();
+
+            Console.Write("Введите номер игрока, которого вы хотите удалить:");
+
+            int playerDeleteNumber;
+            bool isCorrectNumber = int.TryParse(Console.ReadLine(), out playerDeleteNumber);
+
+            if (isCorrectNumber)
+            {
+                _players.RemoveAt(playerDeleteNumber);
+            }
+            else
+            {
+                Console.WriteLine("Некорректный номер.");
+            }
+
+        }
+    }
+}
