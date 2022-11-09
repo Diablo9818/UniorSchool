@@ -1,0 +1,262 @@
+using System;
+using System.Collections.Generic;
+
+namespace ConsoleApp56
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Player
+    {
+        public string Nick { get; private set; }
+        public int ID { get; private set; }
+        public int Level { get; private set; }
+        public bool IsBanned { get; private set; }
+
+        public Player(string nick, int id, int level, bool isBanned)
+        {
+            Nick = nick;
+            Level = level;
+            ID = id;
+            IsBanned = isBanned;
+        }
+
+        public void Ban()
+        {
+            IsBanned = true;
+        }
+
+        public void Unban()
+        {
+            IsBanned = false;
+        }
+
+        public void ShowInfo()
+        {
+            string status;
+
+            if (IsBanned == true)
+            {
+                status = "забанен";
+            }
+            else
+            {
+                status = "разбанен";
+            }
+
+            Console.WriteLine($"Номер игрока:{ID}, имя игрока:{Nick}, уровень игрока:{Level}, статус игрока:{status}.");
+        }
+    }
+
+    class Database
+    {
+        private List<Player> _players = new List<Player>();
+
+        public void Work()
+        {
+            const string CommandShowPlayers = "1";
+            const string CommandAddPlayer = "2";
+            const string CommandBlockPlayer = "3";
+            const string CommandUnblockPlayer = "4";
+            const string CommandDeletePlayer = "5";
+            const string CommandExitProgram = "6";
+
+            string menu = $"{CommandShowPlayers} - Вывеси список игроков. \n{CommandAddPlayer} - Добавить игрока. \n{CommandBlockPlayer} - Заблокировать игрока.\n{CommandUnblockPlayer} - Разблокировать игрока.\n{CommandDeletePlayer} - Удалить игрока. \n{CommandExitProgram} - Выход";
+            bool isProgramWork = true;
+
+            while (isProgramWork)
+            {
+                Console.WriteLine("Список команд:");
+                Console.WriteLine(menu);
+                Console.Write("\nВведите команду:");
+                string userInputCommand = Console.ReadLine();
+
+                {
+                    switch (userInputCommand)
+                    {
+                        case CommandShowPlayers:
+                            ShowDatabase();
+                            break;
+                        case CommandAddPlayer:
+                            AddPlayer();
+                            break;
+                        case CommandBlockPlayer:
+                            BanPlayer();
+                            break;
+                        case CommandUnblockPlayer:
+                            UnbanPlayer();
+                            break;
+                        case CommandDeletePlayer:
+                            DeletePlayer();
+                            break;
+                        case CommandExitProgram:
+                            isProgramWork = false;
+                            break;
+                        default:
+                            Console.WriteLine("Неправильно введена команда.");
+                            break;
+                    }
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private void ShowDatabase()
+        {
+            if (_players.Count > 0)
+            {
+                for (int i = 0; i < _players.Count; i++)
+                {
+                    _players[i].ShowInfo();
+                }
+            }
+            else
+            {
+                Console.WriteLine("В базе данных нет ни одного игрока.");
+            }
+
+        }
+
+        private void AddPlayer()
+        {
+            int playerID = CreateIDNumber();
+
+            Console.Write("Введите имя игрока: ");
+            string playerName = Console.ReadLine();
+
+            Console.Write("Введите уровень игрока: ");
+            int playerLevel;
+            bool isCorrectLevel = int.TryParse(Console.ReadLine(), out playerLevel);
+            bool isBanned = false;
+
+            if (isCorrectLevel)
+            {
+                _players.Add(new Player(playerName, playerID, playerLevel, isBanned));
+            }
+            else
+            {
+                Console.Write("Введено некорректное значение.");
+            }
+
+        }
+
+        private void BanPlayer()
+        {
+            ShowDatabase();
+            Console.Write("\nВведите номер игрока, которого надо заблокировать:");
+            int blockNumber = FindPlayerIndex();
+
+            if(_players[blockNumber].IsBanned == false)
+            {
+                _players[blockNumber].Ban();
+                Console.WriteLine("Игрок успешно заблокирован.");
+            }
+
+        }
+
+        private void UnbanPlayer()
+        {
+            ShowDatabase();
+            Console.Write("\nВведите номер игрока, которого надо разблокировать:");
+            int blockNumber = FindPlayerIndex();
+
+            if(_players[blockNumber].IsBanned == true)
+            {
+                _players[blockNumber].Unban();
+                Console.WriteLine("Игрок успешно разблокирован.");
+            }
+
+        }
+
+        private void DeletePlayer()
+        {
+            ShowDatabase();
+
+            Console.Write("Введите номер игрока, которого вы хотите удалить:");
+
+            int deleteNumber = FindPlayerIndex();
+            _players.RemoveAt(deleteNumber);
+            Console.WriteLine("Игрок удален.");
+        }
+
+        private int FindPlayerIndex()
+        {
+            bool isWork = true;
+            int maxIndexGamer = int.MaxValue;
+            int indexGamer = maxIndexGamer;
+
+            while (isWork)
+            {
+                int userInput = GetNumber();
+
+                bool isSuccess = _players.Exists(player => player.ID == userInput);
+
+                if (isSuccess == true && indexGamer <= maxIndexGamer)
+                {
+                    isWork = false;
+                    indexGamer = _players.FindIndex(player => player.ID == userInput);
+                }
+                else
+                {
+                    Console.WriteLine("Такого игрока в базе нет. Введите корректное значение.");
+                }
+            }
+
+            return indexGamer;
+        }
+
+        private int GetNumber()
+        {
+            int resault = 0;
+            bool isRun = true;
+
+            while (isRun)
+            {
+                string userInput = Console.ReadLine();
+                bool isSuccess = int.TryParse(userInput, out int resaultParse);
+
+                if (resaultParse >= 0 && isSuccess == true)
+                {
+                    resault = resaultParse;
+                    isRun = false;
+                }
+                else
+                {
+                    Console.WriteLine("Введите корректное значение.");
+                }
+            }
+
+            return resault;
+        }
+
+        private int CreateIDNumber()
+        {
+            Random random = new Random();
+            int minIDNumber = 0;
+            int maxIDNumber = int.MaxValue;
+            int createdID = 0;
+            int tempID = 0;
+            bool isWork = true;
+
+            while (isWork)
+            {
+                if(_players.Exists(player => player.ID == createdID) == false)
+                {
+                    tempID = Convert.ToInt32((random.Next(minIDNumber, maxIDNumber)));
+                    isWork = false;
+                }
+            }
+            createdID = tempID;
+            return createdID;
+        }
+
+    }
+}
