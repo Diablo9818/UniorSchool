@@ -1,0 +1,151 @@
+using System;
+using System.Collections.Generic;
+
+namespace CardDeck
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            const string GetCardCommand = "1";
+            const string FinishGameCommand = "2";
+            const string ExitProgramm = "3";
+            Player player = new Player();
+            Deck deck = new Deck();
+
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine($"Список команд: \n{GetCardCommand} - Вытянуть карту.\n{FinishGameCommand} - Показать вытянутые карты.\n{ExitProgramm} - выйти.");
+                Console.Write("Введите команду: ");
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case GetCardCommand:
+                        player.TakeCard(deck);
+                        break;
+                    case FinishGameCommand:
+                        player.ShowCard();
+                        break;
+                    case ExitProgramm:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неверная команда.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+    }
+
+    class Player
+    {
+        private List<Card> _hand = new List<Card>();
+
+        public void TakeCard(Deck deck)
+        {
+            if(deck.TryTakeCard(out Card card))
+            {
+                _hand.Add(card);
+            }
+        }
+
+        public void ShowCard()
+        {
+            for (int i = 0; i < _hand.Count; i++)
+            {
+                Console.WriteLine($"Карта: {_hand[i].Name}  очки карты: {_hand[i].Point}");
+            }
+        }
+
+    }
+
+    class Card
+    {
+        public string Name { get; private set; }
+        public int Point { get; private set; }
+
+        public Card(string name, int point)
+        {
+            Name = name;
+            Point = point;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine(Name + " " + Point);
+        }
+    }
+
+    class Deck
+    {
+        private List<Card> _cards = new List<Card>();
+
+
+        public Deck()
+        {
+            Fill();
+        }
+
+        public bool TryTakeCard(out Card card)
+        {
+            if(_cards.Count > 0)
+            {
+                card = _cards[GetNumberCard()];
+                _cards.Remove(card);
+                return true;
+            }
+            else
+            {
+                card = null;
+                return false;
+            }
+        }
+
+        public void ShowCards()
+        {
+            foreach (Card card in _cards)
+            {
+                card.ShowInfo();
+            }
+        }
+
+        private int GetNumberCard()
+        {
+            int numberCard = 0;
+            bool isSuccess = int.TryParse(Console.ReadLine(), out numberCard);
+
+            if (isSuccess && _cards.Count > numberCard)
+            {
+                return numberCard;
+            }
+
+            return numberCard;
+        }
+
+        private int GetPoint()
+        {
+            Random random = new Random();
+            int minimalPoint = 1;
+            int maximalPoint = 13;
+            int point = random.Next(minimalPoint, maximalPoint);
+
+            return point;
+        }
+
+        private void Fill()
+        {
+            string[] suits = new string[] { "♠", "♥", "♣", "♦" };
+
+            for (int i = 0; i < suits.Length; i++)
+            {
+                _cards.Add(new Card(suits[i], GetPoint()));
+            }
+        }
+    }
+}
