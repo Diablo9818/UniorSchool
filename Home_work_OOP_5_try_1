@@ -1,0 +1,205 @@
+using System;
+using System.Collections.Generic;
+
+namespace BookCollection
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Librarian librarian = new Librarian();
+            librarian.Work();
+        }
+    }
+
+    class Librarian
+    {
+        Storage storage = new Storage();
+        public void Work()
+        {
+            const string AddBookComand = "1";
+            const string FindAllByNameCommand = "2";
+            const string FindAllByAuthorComand = "3";
+            const string FindAllByYearComand = "4";
+            const string DeleteBookComand = "5";
+            const string ShowAllBooksCommand = "6";
+            const string ExitComand = "7";
+            bool isWorking = true;
+
+            while (isWorking)
+            {
+                Console.WriteLine($"Список команд: \n{AddBookComand} - Добавить книгу. \n{FindAllByNameCommand} - Найти все книги по названию. \n{FindAllByAuthorComand} - Найти все книги по автору. \n{FindAllByYearComand} - Найти все книги по году. \n{DeleteBookComand} - удалить книгу.\n{ShowAllBooksCommand} - показать все книги. \n{ExitComand} - выйти.");
+                Console.Write("Введите команду:");
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case AddBookComand:
+                        storage.AddBook();
+                        break;
+                    case FindAllByNameCommand:
+                        storage.FindbyName();
+                        break;
+                    case FindAllByAuthorComand:
+                        storage.FindbyAuthor();
+                        break;
+                    case FindAllByYearComand:
+                        storage.FindbyYear();
+                        break;
+                    case DeleteBookComand:
+                        storage.Delete();
+                        break;
+                    case ShowAllBooksCommand:
+                        storage.ShowInfo();
+                        break;
+                    case ExitComand:
+                        isWorking = false;
+                        break;
+                    default:
+                        Console.WriteLine("Такой команды нет.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+    }
+    
+    class Book
+    {
+        public string Name { get; private set; } 
+        public string Author { get; private set; }
+        public string CreatingYear { get; private set; }
+
+        public Book(string name, string author, string creatingYear)
+        {
+            Name = name;
+            Author = author;
+            CreatingYear = creatingYear;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Название книги: {Name}. Автор книги: {Author}.Год издания:{CreatingYear}");
+        }
+    }
+
+    class Storage
+    {
+        private List<Book> _books = new List<Book>();
+        private List<Book> _booksByAuthor = new List<Book>();
+        private List<Book> _booksByName = new List<Book>();
+        private List<Book> _booksByYear = new List<Book>();
+
+
+        public void AddBook()
+        {
+            _books.Add(new Book(CreateName(), CreateAuthor(), CreateYear()));
+        }
+
+        public void Delete()
+        {
+            ShowInfo();
+            Console.Write("Введите название книги, которую хотите удалить:");
+            string name = Console.ReadLine();
+            bool isNameExist = _books.Exists(book => book.Name.ToLower() == name.ToLower());
+
+            if (isNameExist)
+            {
+                Console.Write("Введите автора этой книги:");
+                string author = Console.ReadLine();
+                bool isAuthorExist = _books.Exists(book => book.Author.ToLower() == author.ToLower());
+
+                if (isAuthorExist)
+                {
+                    Console.Write("Введите год написания книги:");
+                    string year = Console.ReadLine();
+                    bool isYearExist = _books.Exists(book => book.CreatingYear == year);
+
+                    if (isYearExist)
+                    {
+                        int findBookIndex = _books.FindIndex(book => book.Name.ToLower() == name.ToLower() && book.Author.ToLower() == author.ToLower() && book.CreatingYear.ToLower() == year.ToLower());
+                        _books.RemoveAt(findBookIndex);
+                        Console.WriteLine("Книга успешно удалена.");
+                    }
+                }
+            }
+        }
+
+        public void ShowInfo()
+        {
+            if(_books.Count > 0)
+            {
+                foreach (Book book in _books)
+                {
+                    book.ShowInfo();
+                }
+            }
+            else
+            {
+                Console.WriteLine("В хранилище нет ни одной книги.");
+            }
+        }
+
+        public void FindbyAuthor()
+        {
+            ShowInfo();
+            Console.Write("Введите фамилию автора:");
+            string name = Console.ReadLine();
+            _booksByAuthor = _books.FindAll(book => book.Author.ToLower() == name.ToLower());
+
+            foreach (Book book in _booksByAuthor)
+            {
+                book.ShowInfo();
+            }
+        }
+
+        public void FindbyYear()
+        {
+            ShowInfo();
+            Console.Write("Введите год написания книги:");
+            string  year = Console.ReadLine();
+            _booksByYear = _books.FindAll(book => book.CreatingYear.ToLower() == year.ToLower());
+
+            foreach (Book book in _booksByYear)
+            {
+                book.ShowInfo();
+            }
+        }
+
+        public void FindbyName()
+        {
+            ShowInfo();
+            Console.Write("Введите название книги:");
+            string name = Console.ReadLine();
+            _booksByName = _books.FindAll(book => book.Name.ToLower() == name.ToLower());
+
+            foreach (Book book in _booksByName)
+            {
+                book.ShowInfo();
+            }
+        }
+
+        private string CreateName()
+        {
+            Console.Write("Введите название книги, которую хотите добавить:");
+            string name = Console.ReadLine();
+            return name;
+        }
+
+        private string CreateAuthor()
+        {
+            Console.Write("Введите фамилию автора:");
+            string author = Console.ReadLine();
+            return author;
+        }
+
+        private string CreateYear()
+        {
+            Console.Write("Введите год написания книги:");
+            string year = Console.ReadLine();
+            return year;
+        }
+    }
+}
