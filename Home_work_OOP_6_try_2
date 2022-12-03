@@ -1,0 +1,219 @@
+using System;
+using System.Collections.Generic;
+
+namespace Shop
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int money = 1430;
+            Seller seller = new Seller();
+            Customer customer = new Customer(money);
+            seller.GetProducts();
+            seller.Work(customer);
+        }
+    }
+
+    class Seller
+    {
+        private List<Product> _products = new List<Product>();
+        public int Money { get; private set; }
+
+        public Seller(int money = 0)
+        {
+            Money = money;
+        }
+
+        public void Work(Customer customer)
+        {
+            const string ShowGoodsCommand = "1";
+            const string SellGoodsCommand = "2";
+            const string LookWhatYouBought = "3";
+            const string Exit = "4";
+
+            string menu = $"{ShowGoodsCommand} - показать доступные товары. \n{SellGoodsCommand} - купить товар. \n{LookWhatYouBought} - посмотреть свою корзину. \n{Exit} - выйти.";
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine("Список команд:");
+                Console.WriteLine(menu);
+                Console.Write("\nВведите команду:");
+                string userInputCommand = Console.ReadLine();
+
+                switch (userInputCommand)
+                {
+                    case ShowGoodsCommand:
+                        ShowInfo();
+                        break;
+                    case SellGoodsCommand:
+                        Sell(customer);
+                        break;
+                    case LookWhatYouBought:
+                        customer.ShowInfo();
+                        break;
+                    case Exit:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неправильно введена команда.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        public void ShowInfo()
+        {
+            foreach (Product product in _products)
+            {
+                if(product.Amount > 0)
+                {
+                    product.ShowInfoForDealer();
+                }
+            }
+        }
+
+        public void GetProducts()
+        {
+            int productsCount = 3;
+            string[] names =  new string[] { "Плескавица", "Чевапи", "Пиво" };
+            Random random = new Random();
+            int lowPrice = 100;
+            int highPrice = 200;
+            int minimalCount = 1;
+            int maximumCount = 10;
+
+            for (int i = 0; i < productsCount; i++)
+            {
+                _products.Add(new Product(names[i],random.Next(lowPrice,highPrice),random.Next(minimalCount,maximumCount)));
+            }
+        }
+
+        public void Sell(Customer customer)
+        {
+            ShowInfo();
+            Console.Write("Какой продукт Вам нужен? ");
+            string productName = Console.ReadLine();
+
+            if (IsExist(productName))
+            {
+                Console.Write("Сколько штук Вы хотите купить:");
+                bool isSucces = int.TryParse(Console.ReadLine(), out int count);
+
+                if (isSucces)
+                {
+                    int totalPrice = _products[FindProduct(productName)].Price * count;
+                    
+                    if(customer.Money >= totalPrice)
+                    {
+                        Console.WriteLine($"С вас {totalPrice} денег.");
+                        Money += totalPrice;
+                        customer.Pay(totalPrice);
+                        customer.Add(productName, _products[FindProduct(productName)].Price, count);
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            _products[FindProduct(productName)].Decrease();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("У вас недостаточно денег.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Введена неверная команда.");
+                }
+
+            }
+            else
+            {
+                Console.WriteLine("Такого товара нет.");
+            }
+        }
+        
+        private int FindProduct(string productName)
+        {
+            int productIndex = -1;
+            foreach (Product product in _products)
+            {
+                if(product.Name.ToLower() == productName.ToLower())
+                {
+                     productIndex = _products.FindIndex(product => product.Name.ToLower() == productName.ToLower());
+                }
+            }
+
+            return productIndex;
+        }
+
+        private bool IsExist(string productName)
+        {
+            bool isExist = _products.Exists(product => product.Name.ToLower() == productName.ToLower());
+            return isExist;
+        }
+
+    }
+
+    class Customer
+    {
+        private List<Product> _products = new List<Product>();
+        public int Money { get; private set; }
+
+        public Customer(int money)
+        {
+            Money = money;
+        }
+
+        public void Add(string name, int price, int amount)
+        {
+            _products.Add(new Product(name, price, amount));
+        }
+
+        public void Pay(int moneyToPay)
+        {
+            Money -= moneyToPay;
+        }
+
+        public void ShowInfo()
+        {
+            foreach (Product product in _products)
+            {
+                product.ShowInfoForBuyer();
+            }
+        }
+    }
+
+    class Product
+    {
+        public string Name { get; private set; }
+        public int Price { get; private set; }
+        public int Amount { get; private set; }
+
+        public Product(string name, int price, int amount)
+        {
+            Name = name;
+            Price = price;
+            Amount = amount;
+        }
+
+        public void ShowInfoForDealer()
+        {
+            Console.WriteLine($"В наличии имеется {Name}, в количестве {Amount} штук. Цена за штуку: {Price}.");
+        }
+
+        public void ShowInfoForBuyer()
+        {
+            Console.WriteLine($"В корзине находится {Name}, в количестве {Amount} штук.");
+        }
+
+        public void Decrease()
+        {
+            Amount--;
+        }
+    }
+}
