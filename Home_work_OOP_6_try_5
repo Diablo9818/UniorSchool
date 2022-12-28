@@ -1,0 +1,191 @@
+using System;
+using System.Collections.Generic;
+
+namespace Shop
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int money = 1430;
+            int cashbox = 0;
+            Seller seller = new Seller(cashbox);
+            Customer customer = new Customer(money);
+            seller.Work(customer);
+        }
+    }
+
+    abstract class Human
+    {
+        protected List<Product> Products = new List<Product>();
+
+        public int Money { get; protected set; }
+
+        public Human(int money)
+        {
+            Money = money;
+        }
+
+        public abstract void ShowInfo();
+    }
+
+    class Seller: Human
+    {
+        public Seller(int money)
+            : base(money)
+        {
+            string[] names = new string[] { "Плескавица", "Чевапи", "Пиво", "Пельмени", "Колбаса", "Ролтон" };
+            Random random = new Random();
+            int lowPrice = 100;
+            int highPrice = 200;
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                Products.Add(new Product(names[i], random.Next(lowPrice, highPrice)));
+            }
+        }
+
+        public override void ShowInfo()
+        {
+            foreach (Product product in Products)
+            {
+                product.ShowFullInfo();
+            }
+        }
+
+        public void Work(Customer customer)
+        {
+            const string ShowGoodsCommand = "1";
+            const string SellGoodsCommand = "2";
+            const string LookWhatYouBought = "3";
+            const string Exit = "4";
+
+            string menu = $"{ShowGoodsCommand} - показать доступные товары. \n{SellGoodsCommand} - купить товар. \n{LookWhatYouBought} - посмотреть свою корзину. \n{Exit} - выйти.";
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine("Список команд:");
+                Console.WriteLine(menu);
+                Console.Write("\nВведите команду:");
+                string userInputCommand = Console.ReadLine();
+
+                switch (userInputCommand)
+                {
+                    case ShowGoodsCommand:
+                        ShowInfo();
+                        break;
+                    case SellGoodsCommand:
+                        SellProduct(customer);
+                        break;
+                    case LookWhatYouBought:
+                        customer.ShowInfo();
+                        break;
+                    case Exit:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неправильно введена команда.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        public void SellProduct(Customer customer)
+        {
+            ShowInfo();
+            Console.Write("Какой продукт Вам нужен? ");
+            string productName = Console.ReadLine();
+
+            if (IsExist(productName))
+            {
+                int totalPrice = Products[FindProduct(productName)].Price;
+
+                if (customer.Money >= totalPrice)
+                {
+                    Console.WriteLine($"С вас {totalPrice} денег.");
+                    Money += totalPrice;
+                    customer.Add(productName, Products[FindProduct(productName)].Price, totalPrice);
+                    Products.RemoveAt(FindProduct(productName));
+                }
+                else
+                {
+                    Console.WriteLine("У вас недостаточно денег.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Такого товара нет.");
+            }
+        }
+        
+        private int FindProduct(string productName)
+        {
+            int productIndex = -1;
+
+            foreach (Product product in Products)
+            {
+                if(product.Name.ToLower() == productName.ToLower())
+                {
+                     productIndex = Products.FindIndex(product => product.Name.ToLower() == productName.ToLower());
+                }
+            }
+
+            return productIndex;
+        }
+
+        private bool IsExist(string productName)
+        {
+            bool isExist = Products.Exists(product => product.Name.ToLower() == productName.ToLower());
+            return isExist;
+        }
+    }
+
+    class Customer: Human
+    {
+        public Customer(int money)
+            : base(money)
+        {
+
+        }
+
+        public override void ShowInfo()
+        {
+            foreach (Product product in Products)
+            {
+                product.ShowShortInfo();
+            }
+        }
+        public void Add(string name, int price, int moneyToPay)
+        {
+            Money -= moneyToPay;
+            Products.Add(new Product(name, price));
+        }
+    }
+
+    class Product
+    {
+        public string Name { get; private set; }
+
+        public int Price { get; private set; }
+
+        public Product(string name, int price)
+        {
+            Name = name;
+            Price = price;
+        }
+
+        public void ShowFullInfo()
+        {
+            Console.WriteLine($"В наличии имеется {Name}. Цена: {Price}.");
+        }
+
+        public void ShowShortInfo()
+        {
+            Console.WriteLine($"В корзине находится {Name}.");
+        }
+    }
+}
