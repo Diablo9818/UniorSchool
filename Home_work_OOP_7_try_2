@@ -1,0 +1,151 @@
+using System;
+using System.Collections.Generic;
+
+namespace TrainsTerminal
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Terminal terminal = new Terminal();
+            terminal.Work();
+        }
+    }
+
+    class Terminal
+    {
+        private const ConsoleKey CommandEnter = ConsoleKey.Enter;
+        private List<Train> _trains;
+        private Random _random;
+
+        public Terminal()
+        {
+            _trains = new List<Train>();
+            _random = new Random();
+        }
+
+        public void Work()
+        {
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine($"Для создания маршрута нажмите {CommandEnter}");
+                Console.ReadKey();
+                Direction direction = new Direction();
+                Console.WriteLine($"Для продажи билетов нажмите {CommandEnter}");
+                Console.ReadKey();
+                SendTrain(direction.CityToArrive, direction.CityFromDepature);
+                Console.WriteLine($"Для отравки поезда нажмите {CommandEnter}");
+                Console.ReadKey();
+                ShowSendsTrains();
+
+            }
+        }
+
+        public void ShowInfo(Train train)
+        {
+            Console.WriteLine($"Поезд {train.DepaturedCity} - {train.ArrivedCity} с {train.CarriageCount} вагонами");
+        }
+
+        private int SellTickets()
+        {
+            int minPassengers = 100;
+            int maxPassengers = 1000;
+            return _random.Next(minPassengers, maxPassengers);
+        }
+
+        private void ShowPassengersInfo(Train train)
+        {
+            Console.WriteLine($"На данном направлении {train.Passengers} пассажиров приобрели билеты, нажмите {ConsoleKey.Enter} чтобы сформировать поезд");
+        }
+
+        public void SendTrain(string cityArrival, string cityDeparture)
+        {
+            int passengers = SellTickets();
+            Train train = new Train(passengers, cityArrival, cityDeparture);
+            _trains.Add(train);
+            ShowPassengersInfo(train);
+        }
+
+        private void ShowSendsTrains()
+        {
+            Console.Clear();
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine("Отправленные поезда:\n");
+
+            for (int i = 0; i < _trains.Count; i++)
+            {
+                ShowInfo(_trains[i]);
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    class Train
+    {
+        private Carriage _carriage = new Carriage();
+        public int Passengers { get; private set; }
+
+        public int CarriageCount { get; private set; }
+
+        public string ArrivedCity { get; private set; }
+
+        public string DepaturedCity { get; private set; }
+
+        public Train(int passengers, string arrivedCity, string depaturedCity)
+        {
+            Passengers = passengers;
+            ArrivedCity = arrivedCity;
+            DepaturedCity = depaturedCity;
+            CarriageCount = CreateCarriages(Passengers);
+        }
+
+        private int CreateCarriages(int passengers)
+        {
+           
+            int neededCarriages = passengers / _carriage.Place;
+
+            if(passengers % _carriage.Place != 0)
+            {
+                neededCarriages++;
+            }
+
+            return neededCarriages;
+        }
+    }
+
+    class Direction
+    {
+        public string CityToArrive { get; private set; }
+        public string CityFromDepature { get; private set; }
+
+        public Direction()
+        {
+            ChooseRoute();
+        }
+
+        private void ChooseRoute()
+        {
+            List<string> cities = new List<string> { "Питер", "Воронеж", "Омск", "Москва", "Калининград", "Воркута", "Нижний Новгород", "Верхний Новгород" };
+            Random random = new Random();
+
+            while (CityToArrive == CityFromDepature)
+            {
+                int arriveIndex = random.Next(cities.Count);
+                int depatureIndex = random.Next(cities.Count);
+
+                CityToArrive = cities[arriveIndex];
+                CityFromDepature = cities[depatureIndex];
+            }
+
+            Console.WriteLine($"Поезд отправляется из города {CityFromDepature} в город {CityToArrive}.");
+        }
+    }
+
+    class Carriage
+    {
+        public int Place { get; private set; } = 50;
+    }
+}
