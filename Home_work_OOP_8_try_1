@@ -1,0 +1,473 @@
+using System;
+using System.Collections.Generic;
+
+namespace WarriorBattle
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Arena arena = new Arena();
+
+            arena.Work();
+        }
+    }
+
+    class Arena
+    {
+        private List<Warrior> _warriors = new List<Warrior>();
+
+        public Arena()
+        {
+            AddFighters();
+        }
+
+        public void Work()
+        {
+            bool isWork = true;
+            while (isWork)
+            {
+                Console.WriteLine("Добро пожаловать на Арену! Наши бойцы:");
+
+                if (_warriors.Count > 1)
+                {
+                    ShowInfo();
+                    Console.WriteLine();
+                    Console.Write("Выбери первого бойца: ");
+                    string firstWarriorName = Console.ReadLine();
+                    Console.Write("Выбери второго бойца: ");
+                    string secondWarriorName = Console.ReadLine();
+
+                    if (IsFigherHere(firstWarriorName) && IsFigherHere(secondWarriorName) && firstWarriorName.ToLower() != secondWarriorName.ToLower())
+                    {
+                        Battle(ChooseFighter(firstWarriorName), ChooseFighter(secondWarriorName));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Неккоректный выбор.");
+                    }
+                }
+
+                if(_warriors.Count == 1)
+                {
+                    ShowWinner();
+                    Console.ReadKey();
+                    isWork = false;
+                }
+            }
+
+        }
+        private void ShowInfo()
+        {
+            for (int i = 0; i < _warriors.Count; i++)
+            {
+                Console.Write(_warriors[i].Name + ". ");
+                _warriors[i].ShowStats();
+            }
+        }
+
+        private void ShowWinner()
+        {
+            for (int i = 0; i < _warriors.Count; i++)
+            {
+                Console.WriteLine("Победитель турнира: " + _warriors[i].Name + "!");
+            }
+        }
+
+        private bool IsFigherHere(string name)
+        {
+            return _warriors.Exists(warrior => warrior.Name.ToLower() == name.ToLower());
+        }
+
+        private Warrior ChooseFighter(string name)
+        {
+            return _warriors[_warriors.FindIndex(warrior => warrior.Name.ToLower() == name.ToLower())];
+        }
+
+        private void Battle(Warrior firstWarrior, Warrior secondWarrior)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Началась битва");
+            Console.WriteLine();
+
+            while (firstWarrior.Health > 0 && secondWarrior.Health > 0)
+            {
+                firstWarrior.Attack(secondWarrior);
+                Console.WriteLine();
+                secondWarrior.Attack(firstWarrior);
+                Console.WriteLine();
+            }
+
+            if(firstWarrior.Health > 0)
+            {
+                Console.WriteLine($"Победил {firstWarrior.Name}");
+            }
+            else if(secondWarrior.Health > 0)
+            {
+                Console.WriteLine($"Победил {secondWarrior.Name}");
+            }
+            else
+            {
+                Console.WriteLine("Ничья.");
+            }
+
+            DeleteFighter();
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+        private void AddFighters()
+        {
+            Barbarian barbarian = new Barbarian();
+            _warriors.Add(barbarian);
+            Paladin paladin = new Paladin();
+            _warriors.Add(paladin);
+            Hunter hunter = new Hunter();
+            _warriors.Add(hunter);
+            Magician magician = new Magician();
+            _warriors.Add(magician);
+            Necromancer necromancer = new Necromancer();
+            _warriors.Add(necromancer);
+        }
+
+        private void DeleteFighter()
+        {
+            _warriors.RemoveAt(_warriors.FindIndex(warrior => warrior.Health <= 0));
+        }
+    }
+
+    class Warrior
+    {
+        public int Health { get; protected set; }
+        public int Damage { get; protected set; }
+        public int Armor { get; protected set; }
+        public string Name { get; protected set; }
+
+        public virtual void Attack(Warrior enemy)
+        {
+            enemy.TakeDamage(Damage);
+        }
+
+        public virtual void TakeDamage(int damage)
+        {
+            Health -= damage / Armor;
+        }
+
+        public virtual void ShowStats()
+        {
+            Console.WriteLine($"Характеристики: здоровье - {Health}, атака - {Damage}, броня - {Armor}.");
+        }
+    }
+
+    class Barbarian: Warrior
+    {
+        private int _cryPower = 5;
+
+        public Barbarian()
+        {
+            Health = 100;
+            Damage = 70;
+            Armor = 30;
+            Name = "Варвар";
+        }
+
+        public void Cry()
+        {
+            int multiplyCoefficient = 2;
+            Armor -= _cryPower;
+            Damage += _cryPower* multiplyCoefficient;
+            Console.WriteLine("Воздух сотрясается от грозного рыка варвара.");
+        }
+
+        public override void Attack(Warrior enemy)
+        {
+            if(Armor > _cryPower)
+            {
+                Cry();
+            }
+
+            Console.WriteLine("Варвар атакует.");
+            enemy.TakeDamage(Damage);
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+        }
+
+        public override void ShowStats()
+        {
+            base.ShowStats();
+        }
+    }
+
+    class Paladin : Warrior
+    {
+        private int _prayPower = 5;
+
+        public int Holiness { get; private set; } = 40;
+
+        public Paladin()
+        {
+            Health = 150;
+            Damage = 40;
+            Armor = 30;
+            Name = "Паладин";
+        }
+
+        public void Pray()
+        {
+            Holiness += _prayPower;
+            Console.WriteLine("Паладин застыл в молитве, а его молот начал излучать слабый свет.");
+        }
+
+        public void HollySmash(int holiness, Warrior enemy)
+        {
+            Console.WriteLine("Палладин делает огромный удар молотом.");
+            Damage += holiness;
+            Holiness = 0;
+            enemy.TakeDamage(Damage);
+        }
+
+        public override void Attack(Warrior enemy)
+        {
+            int happeningAttack = 1;
+            int happeningPray = 2;
+            Random random = new Random();
+            int happening = random.Next(happeningAttack, happeningPray+1);
+
+            if(happening == happeningAttack)
+            {
+                if (isHollyEnought(Holiness))
+                {
+                    HollySmash(Holiness, enemy);
+                }
+                else
+                {
+                    Console.WriteLine("Паладин атакует.");
+                    enemy.TakeDamage(Damage);
+                }
+            }
+            else if(happening == happeningPray)
+            {
+                Pray();
+            }
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+        }
+
+        public override void ShowStats()
+        {
+            base.ShowStats();
+        }
+
+        private bool isHollyEnought(int holiness)
+        {
+            int hollyCounter = 100;
+
+            if(holiness >= hollyCounter)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    class Hunter : Warrior
+    {
+        public bool IsInvisible { get; private set; }
+        public int Stamina { get; private set; } = 25;
+
+        public Hunter()
+        {
+            Health = 80;
+            Damage = 60;
+            Armor = 30;
+            Name = "Охотник";
+        }
+
+        public void DrinkALe()
+        {
+            int staminaBoost = 5;
+            Stamina += staminaBoost;
+            Console.WriteLine("Охотник открывает свою пыльную  фляжку и делает пару глубоких глотков.");
+        }
+        public bool GoIntoShadow()
+        {
+            if(Stamina >= 25)
+            {
+                IsInvisible = true;
+                Stamina = 0;
+            }
+            else
+            {
+                IsInvisible = false;
+            }
+            return IsInvisible;
+        }
+        public override void Attack(Warrior enemy)
+        {
+            Console.WriteLine("Охотник стреляет из своего меткого лука.");
+            enemy.TakeDamage(Damage);
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            if(GoIntoShadow() == false)
+            {
+                Health -= damage / Armor;
+                DrinkALe();
+            }
+            else
+            {
+                Console.WriteLine("Охотник исчез. Где же он?");
+            }
+        }
+
+        public override void ShowStats()
+        {
+            base.ShowStats();
+        }
+
+    }
+
+    class Magician : Warrior
+    {
+        private int _fullMana = 50;
+        public int Mana { get; private set; } = 50;
+
+        public Magician()
+        {
+            Health = 65;
+            Damage = 15;
+            Armor = 35;
+            Name = "Маг";
+        }
+
+        public void DrinkPoison()
+        {
+            int drinkManaSize = 10;
+
+            if(Mana < _fullMana)
+            {
+                Mana += drinkManaSize;
+            }
+
+            if(Mana >= _fullMana)
+            {
+                Mana = _fullMana;
+            }
+        }
+        public override void Attack(Warrior enemy)
+        {
+            int manaForSpell = 10;
+
+            if(Mana >= manaForSpell)
+            {
+                int damageMultiplty = 2;
+                Damage = Damage * damageMultiplty;
+                Mana -= manaForSpell;
+            }
+            else
+            {
+                Console.WriteLine("У Вас не хватает маны. Заклинание не удалось.");
+                DrinkPoison();
+                Damage = 15;
+            }
+
+            enemy.TakeDamage(Damage);
+            Console.WriteLine("Маг творит свои тайные заклинания!");
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+        }
+
+        public override void ShowStats()
+        {
+            base.ShowStats();
+        }
+    }
+
+    class Necromancer : Warrior
+    {
+        private int  _fullMana = 50;
+        public int Mana { get; private set; } = 20;
+        public Necromancer()
+        {
+            Health = 70;
+            Damage = 50;
+            Armor = 40;
+            Name = "Некромант";
+        }
+
+        public void DrinkPoison()
+        {
+            int poisonSize = 15;
+
+            if(Mana < _fullMana)
+            {
+                Mana += poisonSize;
+            }
+
+            if(Mana >= _fullMana)
+            {
+                Mana = _fullMana;
+            }
+
+            Console.WriteLine("Некромант выпил свое темное зелье ");
+        }
+        public int DrinkBlood()
+        {
+            int minBloodSize = 10;
+            int maxBloodSize = 50;
+
+            Random random = new Random();
+            int stolenHealth = random.Next(minBloodSize, maxBloodSize);
+
+            if(Mana >= stolenHealth)
+            {
+                Mana -= stolenHealth;
+                return stolenHealth;
+            }
+
+            stolenHealth = 0;
+            return stolenHealth;
+        }
+
+        public override  void Attack(Warrior enemy)
+        {
+            int neededMana = 10;
+
+            if(Mana >= neededMana)
+            {
+                Health += DrinkBlood();
+                Mana -= neededMana;
+                Console.WriteLine("Некромант вероломно высасывает жизнь из противника.");
+                enemy.TakeDamage(DrinkBlood());
+            }
+            else
+            {
+                DrinkPoison();
+                enemy.TakeDamage(Damage);
+                Console.WriteLine("Некромант выпускает темные шары из своих костлявых рук.");
+            }
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+        }
+
+        public  override void ShowStats()
+        {
+            base.ShowStats();
+        }
+    }
+}
