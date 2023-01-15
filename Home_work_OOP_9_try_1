@@ -1,0 +1,250 @@
+using System;
+using System.Collections.Generic;
+
+namespace SuperMarket
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Supermarket supermarket = new Supermarket();
+            supermarket.Work();
+        }
+    }
+
+    class Supermarket
+    {
+        private Queue<Customer> _customers = new Queue<Customer>();
+        private List<Product> _products = new List<Product>();
+
+        public Supermarket()
+        {
+            CreateBuyers();
+            FillShelf();
+        }
+
+        public void Work()
+        {
+            ServeClients();
+            CheckClients();
+        }
+
+        private void CheckClients()
+        {
+            foreach (Customer customer in _customers)
+            {
+                GetMoney(customer);
+            }
+        }
+
+        private void ServeClients()
+        {
+            foreach (Customer customer in _customers)
+            {
+                bool isWork = true;
+                int goodCounter = 0;
+
+                while (isWork)
+                {
+                    ShowGoods();
+                    Console.WriteLine();
+                    Console.WriteLine("Выберите товары:");
+                    ChooseGood(customer);
+
+                    string agreement = "Да";
+                    Console.Write("Желаете продолжить? ");
+                    string userAnswer = Console.ReadLine();
+
+                    goodCounter++;
+                    Console.Clear();
+
+                    if (userAnswer.ToLower() != agreement.ToLower())
+                    {
+                        Console.WriteLine("Пройдите на кассу.");
+                        isWork = false;
+                    }
+                }
+
+                RefillShelf(goodCounter);
+                Console.Clear();
+            }
+        }
+
+        private void GetMoney(Customer customer)
+        {
+            customer.ShowInfo();
+            Console.WriteLine($"С вас {customer.CountTotalSum()} рублей.");
+            bool isWork = true;
+
+            while (isWork)
+            {
+                if (customer.Money >= customer.CountTotalSum())
+                {
+                    Console.WriteLine();
+                    customer.Pay(customer.CountTotalSum());
+                    Console.WriteLine("Товары успешно оплачены.");
+                    Console.WriteLine();
+                    isWork = false;
+                }
+                else if (customer.Money < customer.CountTotalSum())
+                {
+                    Console.WriteLine("У вас не хватает денег. Вам нужно избавиться от товара.");
+                    customer.ThrowAway();
+                }
+            }
+        }
+
+        private void ChooseGood(Customer customer)
+        {
+            Console.Write("Введите индекс товара, который вы хотите купить: ");
+            int goodIndex;
+            bool isSuccesfull = int.TryParse(Console.ReadLine(), out goodIndex);
+
+            if (isSuccesfull)
+            {
+                customer.FillBusket(_products[goodIndex]);
+                _products.RemoveAt(goodIndex);
+            }
+        }
+
+        private void ShowGoods()
+        {
+            Console.WriteLine("Наши товары: ");
+
+            for (int i = 0; i <_products.Count; i++)
+            {
+                Console.Write(i + " ");
+                _products[i].ShowInfo();
+            }
+        }
+        private void RefillShelf(int goodCounter)
+        {
+            for (int i = 0; i < goodCounter; i++)
+            {
+                _products.Add(new Product());
+            }
+        }
+
+        private void FillShelf()
+        {
+            int productNumber = 20;
+
+            for (int i = 0; i < productNumber; i++)
+            {
+                _products.Add(new Product());
+            }
+        }
+
+        private void CreateBuyers()
+        {
+            int buyerNumber = 11;
+
+            for (int i = 0; i < buyerNumber; i++)
+            {
+                _customers.Enqueue(new Customer());
+            }
+        }
+    }
+
+    class Customer
+    {
+        private List<Product> _products = new List<Product>();
+
+        public int Money { get; private set; }
+
+        public Customer()
+        {
+            FillWallet();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine("Продукты в корзине:");
+
+            foreach (Product product in _products)
+            {
+                product.ShowInfo();
+            }
+
+            Console.WriteLine($"В кошельке {Money} рублей.");
+        }
+
+        public void FillBusket(Product product)
+        {
+            _products.Add(product);
+        }
+
+        public int CountTotalSum()
+        {
+            int sum = 0;
+            foreach (Product product in _products)
+            {
+                 sum += product.Price;
+            }
+            return sum;
+        }
+
+        public void Pay(int check)
+        {
+            Money -= check;
+        }
+
+        public void ThrowAway()
+        {
+            int firstNaumber = 0;
+            int secondNumber = _products.Count;
+
+            Random random = new Random();
+            _products.RemoveAt(random.Next(firstNaumber, secondNumber));
+        }
+
+        private void FillWallet()
+        {
+            Random random = new Random();
+
+            int minMoneyNumber = 1;
+            int maxMoneyNumber = 2001;
+
+            Money = random.Next(minMoneyNumber, maxMoneyNumber);
+        }
+    }
+
+    class Product
+    {
+        public string Name { get; private set; }
+        public int Price { get; private set; }
+
+        public Product()
+        {
+            CreateName();
+            CreatePrice();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine(Name + " стоит " + Price + " рублей.");
+        }
+
+        private void CreateName()
+        {
+             List<string> names =  new List<string>(){ "Сыр","Хлеб","Молоко","Колбаса","Сосиски","Курица" };
+            int firstNumber = 0;
+            int lastNumber = names.Count;
+
+            Random random = new Random();
+
+            Name = names[random.Next(firstNumber, lastNumber)];
+
+        }
+
+        private void CreatePrice()
+        {
+            int maxPrice = 1001;
+            int minPrice = 100;
+
+            Random random = new Random();
+
+            Price = random.Next(minPrice, maxPrice);
+        }
+    }
+}
