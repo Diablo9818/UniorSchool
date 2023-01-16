@@ -1,0 +1,211 @@
+using System;
+using System.Collections.Generic;
+
+namespace BattleArmies
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Army army = new Army();
+            army.ShowInfo();
+        }
+    }
+
+    class Battlegroung
+    {
+        private Army _firstArmy;
+        private Army _secondArmy;
+
+        public Battlegroung(Army firstArmy, Army secondArmy)
+        {
+            _firstArmy = firstArmy;
+            _secondArmy = secondArmy;
+        }
+
+        public void Fight()
+        {
+            _firstArmy.SoldierAttack(_secondArmy);
+        }
+    }
+
+    class Army
+    {
+        private List<Soldier> _soldiers = new List<Soldier>();
+
+        public string Country { get; private set; }
+        
+        public Army()
+        {
+            SetCountry();
+            FillArmy();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Армия страны {Country}:");
+
+            foreach (Soldier soldier in _soldiers)
+            {
+                soldier.ShowInfo();
+            }
+        }
+
+        public void SoldiersAttack(Soldier enemy)
+        {
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                _soldiers[i].Attack( enemy);
+            }
+        }
+
+        public void SoldiersTakeDamage()
+        {
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                _soldiers[i].TakeDamage()
+            }
+        }
+
+        private void FillArmy()
+        {
+            int armySize = 20;
+
+            for (int i = 0; i < armySize; i++)
+            {
+                _soldiers.Add(new Soldier());
+            }
+        }
+
+        private void SetCountry()
+        {
+            string[] counrtyNames = new string[] { "Россия", "США", "Великобритания", "Украина", "Германия", "Казахстан", "Япония", "Монголия", };
+
+            Random random = new Random();
+
+            Country = counrtyNames[random.Next(0, counrtyNames.Length)];
+        }
+
+
+
+    }
+
+    class Soldier
+    {
+        public Weapon Arsenal { get; private set; }
+        public float Health { get; private set; }
+        public float Armor { get; private set; }
+
+       public Soldier()
+        {
+            SetHealth();
+            SetArmor();
+            SetWeapon();
+        }
+
+        public void Attack(Soldier soldier)
+        {
+            Arsenal.Shoot(soldier);
+        }
+
+        public void TakeDamage(int damage)
+        {
+            Health -= damage - Armor;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Солдат с оружием {Arsenal.Name}, броней {Armor} и здоровьем {Health}.");
+        }
+
+        private void SetHealth()
+        {
+            int maxHealth = 101;
+            int minHealth = 10;
+
+            Random random = new Random();
+
+            Health = random.Next(minHealth, maxHealth);
+        }
+
+        private void SetWeapon()
+        {
+            const int numberForGun = 1;
+            const int numberForMiniGun = 2;
+            const int numberForPistol = 3;
+
+            int firstNumber = 1;
+            int lastNumber = 3;
+
+            Random random = new Random();
+
+            int numberForWeapon = random.Next(firstNumber, lastNumber);
+
+            switch (numberForWeapon)
+            {
+                case numberForGun:
+                    Arsenal = new Gun();
+                    break;
+                case numberForMiniGun:
+                    Arsenal = new Minigun();
+                    break;
+                case numberForPistol:
+                    Arsenal = new Pistol();
+                    break;
+            }
+        }
+
+        private void SetArmor()
+        {
+            int maxArmor = 101;
+            int minArmor = 10;
+
+            Random random = new Random();
+
+            Armor = random.Next(minArmor, maxArmor);
+        }
+    }
+
+    class Weapon
+    {
+        public string Name { get; protected set; }
+        public int Damage { get; protected set; }
+        public int ShootingSpeed { get; protected set; }
+
+         public virtual void Shoot(Soldier soldier)
+         {
+            soldier.TakeDamage(Damage * ShootingSpeed);
+         }
+    }
+
+    class Gun: Weapon
+    {
+        public Gun()
+        {
+            Name = "Винтовка";
+            Damage = 5;
+            ShootingSpeed = 4;
+        }
+    }
+
+    class Minigun: Weapon
+    {
+        public Minigun()
+        {
+            Name = "Пулемет";
+            Damage = 5;
+            ShootingSpeed = 15;
+        }
+    }
+
+    class Pistol: Weapon
+    {
+        public Pistol()
+        {
+            Name = "Пистолет";
+            Damage = 3;
+            ShootingSpeed = 6;
+        }
+    }
+
+}
