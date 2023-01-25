@@ -1,0 +1,228 @@
+using System;
+using System.Collections.Generic;
+
+namespace BattleArmies
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Battlegroung battlegroung = new Battlegroung();
+            battlegroung.Fight();
+        }
+    }
+
+    class Battlegroung
+    {
+        private Army _firstArmy;
+        private Army _secondArmy;
+
+        public Battlegroung()
+        {
+            _firstArmy = new Army();
+            _secondArmy = new Army();
+        }
+
+        public void Fight()
+        {
+            int BattleCounter = 1;
+            Console.WriteLine($"На поле битвы встретилась страна {_firstArmy.Country} и {_secondArmy.Country}");
+            Console.WriteLine();
+            
+            while(_firstArmy.HasSoldiers && _secondArmy.HasSoldiers)
+            {
+                Console.WriteLine(BattleCounter + " Бой!");
+                _firstArmy.Attack(_secondArmy);
+                _secondArmy.Attack(_firstArmy);
+                _firstArmy.DeleteDeadsSoldiers();
+                _secondArmy.DeleteDeadsSoldiers();
+                ShowInfo();
+                BattleCounter++;
+            }
+
+            if (_firstArmy.HasSoldiers)
+            {
+                Console.WriteLine();
+                Console.WriteLine(_firstArmy.Country + " победила!");
+            }
+            else if (_secondArmy.HasSoldiers)
+            {
+                Console.WriteLine();
+                Console.WriteLine(_secondArmy.Country + " победила!");
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine("Не выжил никто!");
+            }
+        }
+
+        private void ShowInfo()
+        {
+            _firstArmy.ShowInfo();
+            _secondArmy.ShowInfo();
+        }
+    }
+
+    class Army
+    {
+        private List<Soldier> _soldiers = new List<Soldier>();
+
+        private Random _random = new Random();
+
+        public string Country { get; private set; }
+
+        public bool HasSoldiers => _soldiers.Count > 0;
+
+        public Army()
+        {
+            SetCountry();
+            Fill();
+        }
+
+        public Soldier GetRandomSoldier()
+        {
+            return _soldiers[_random.Next(_soldiers.Count)];
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Армия страны {Country}:");
+
+            foreach (Soldier soldier in _soldiers)
+            {
+                soldier.ShowInfo();
+            }
+        }
+
+        public void Attack(Army secondArmy)
+        {
+            Soldier soldier = GetRandomSoldier();
+            Soldier secondSoldier = secondArmy.GetRandomSoldier();
+
+            soldier.Attack(secondSoldier);
+        }
+
+        public void DeleteDeadsSoldiers()
+        {
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                if(_soldiers[i].Health <= 0)
+                {
+                    _soldiers.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
+        private void Fill()
+        {
+            int armySize = 5;
+
+            for (int i = 0; i < armySize; i++)
+            {
+                _soldiers.Add(new Soldier());
+            }
+        }
+
+        private void SetCountry()
+        {
+            string[] counrtyNames = new string[] { "Россия", "США", "Великобритания", "Украина", "Германия", "Казахстан", "Япония", "Монголия", };
+
+            Country = counrtyNames[_random.Next(0, counrtyNames.Length)];
+        }
+    }
+
+    class Soldier
+    {
+        private Random _random = new Random();
+        public Weapon Arsenal { get; private set; }
+        public int Health { get; private set; }
+        public int Armor { get; private set; }
+
+       public Soldier()
+        {
+            SetHealth();
+            SetArmor();
+            SetWeapon();
+        }
+
+        public void Attack(Soldier soldier)
+        {
+            Arsenal.Shoot(soldier);
+        }
+
+        public void TakeDamage(int damage)
+        {
+            Health -= damage / Armor;
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Солдат с оружием {Arsenal.Name}, броней {Armor} и здоровьем {Health}.");
+        }
+
+        private void SetHealth()
+        {
+            int maxHealth = 101;
+            int minHealth = 10;
+
+            Health = _random.Next(minHealth, maxHealth);
+        }
+
+        private void SetWeapon()
+        {
+            Arsenal = new Weapon();
+        }
+
+        private void SetArmor()
+        {
+            int maxArmor = 101;
+            int minArmor = 10;
+
+            Armor = _random.Next(minArmor, maxArmor);
+        }
+    }
+
+    class Weapon
+    {
+
+        private Random _random = new Random();
+        public string Name { get; protected set; }
+        public int Damage { get; protected set; }
+        public int ShootingSpeed { get; protected set; }
+
+        public Weapon()
+        {
+            SetName();
+            SetDamage();
+            SetSpeed();
+        }
+
+         public virtual void Shoot(Soldier soldier)
+         {
+            soldier.TakeDamage(Damage * ShootingSpeed);
+         }
+
+        private void SetName()
+        {
+            string[] names = new string[] { "Винтовка", "Пулемет", "Пистолет" };
+
+            Name = names[_random.Next(names.Length)];
+        }
+
+        private void SetDamage()
+        {
+            int maxDamage = 51;
+
+            Damage = _random.Next(maxDamage);
+        }
+
+        private void SetSpeed()
+        {
+            int maxSpeed = 10;
+
+            ShootingSpeed = _random.Next(maxSpeed);
+        }
+    }
+}
