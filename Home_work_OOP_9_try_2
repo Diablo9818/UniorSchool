@@ -217,17 +217,5 @@ namespace SuperMarket
         {
             Console.WriteLine(Name + " стоит " + Price + " рублей.");
         }
-
-        private void CreateName()
-        {
-            List<string> names = new List<string>() { "Сыр", "Хлеб", "Молоко", "Колбаса", "Сосиски", "Курица" };
-            int firstNumber = 0;
-            int lastNumber = names.Count;
-
-            Random random = new Random();
-
-            Name = names[random.Next(firstNumber, lastNumber)];
-
-        }
     }
 }
