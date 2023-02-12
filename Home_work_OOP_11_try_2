@@ -1,0 +1,230 @@
+using System;
+using System.Collections.Generic;
+
+namespace Aquarium
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Manager manager = new Manager();
+            manager.Work();
+        }
+    }
+
+    class Manager
+    {
+        private const string AddCommand = "1";
+        private const string DeleteCommand = "2";
+        private const string ShowInfoCommand = "3";
+        private const string ExitCommand = "4";
+
+        public void Work()
+        {
+            Aquarium aquarium = new Aquarium(ChooseSize());
+
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine($"Список команд:{AddCommand} - добавить рыбку, {DeleteCommand} - удалить рыбку, {ShowInfoCommand} - посмотреть рыбок, {ExitCommand} - выход");
+
+                Console.Write("Введите команду: ");
+                string UserComand = Console.ReadLine();
+
+                switch (UserComand)
+                {
+                    case AddCommand:
+                        aquarium.AddAnimal();
+                        break;
+                    case DeleteCommand:
+                        aquarium.TakeOutAnimal();
+                        break;
+                    case ShowInfoCommand:
+                        aquarium.ShowInfo();
+                        break;
+                    case ExitCommand:
+                        isWork = false;
+                        break;
+                }
+
+                aquarium.AnimalGrow();
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private int ChooseSize()
+        {
+            bool isWork = true;
+            int size = 0;
+
+            Console.Write("Какого размера аквариум Вам нужен? ");
+
+            while (isWork)
+            {
+
+                bool isSuccesfull = int.TryParse(Console.ReadLine(), out size);
+
+                if (isSuccesfull)
+                {
+                    isWork = false;
+                }
+                else
+                {
+                    Console.WriteLine("Введите корректное значение.");
+                }
+            }
+
+            return size;
+        }
+
+    }
+
+    class Aquarium
+    {
+        private List<Fish> _fishes = new List<Fish>();
+
+        public Aquarium(int size)
+        {
+            Size = size;
+            Fill();
+        }
+
+        public int Size { get; private set; }
+
+        public void AnimalGrow()
+        {
+            foreach (Fish fish in _fishes)
+            {
+                fish.BecomeOlder();
+            }
+        }
+
+        public void ShowInfo()
+        {
+            int index = 0;
+            Console.WriteLine("В аквариуме находятся:");
+
+            foreach (Fish fish in _fishes)
+            {
+                Console.Write(index + ". ");
+                fish.ShowInfo();
+                index++;
+            }
+        }
+
+        public void AddAnimal()
+        {
+            if(_fishes.Count <= Size - 1)
+            {
+                _fishes.Add(new Fish());
+                Console.WriteLine("Рыба успешно добавлена!");
+            }
+            else
+            {
+                Console.WriteLine("Нужно больше места.");
+            }
+        }
+
+        public void TakeOutAnimal()
+        {
+            ShowInfo();
+            Console.WriteLine();
+            Console.Write("Введите индекс рыбы, которую хотите убрать из аквариума: ");
+            int animalIndex;
+            bool isSuccesful = int.TryParse(Console.ReadLine(), out animalIndex);
+
+            if (isSuccesful && animalIndex <= _fishes.Count && animalIndex > 0)
+            {
+                _fishes.RemoveAt(animalIndex);
+            }
+            else
+            {
+                Console.WriteLine("Неверный индекс.");
+            }
+        }
+
+        private void Fill()
+        {
+            while (_fishes.Count <= Size - 1)
+            {
+                _fishes.Add(new Fish());
+            }
+        }
+    }
+
+    class Fish
+    {
+        private List<string> _names = new List<string>() { "Топорик", "Бульбазавр", "Немо", "Погрызуха", "Тихоня", "Крепыш" };
+
+        List<string> _kinds = new List<string>() { "Акула", "Карась", "Окунь", "Щука", "Язь", "Карп" };
+
+        private Random _random = new Random();
+
+        public Fish()
+        {
+            CreateName();
+            CreateAge();
+            CreateKind();
+            CreateAgeOfDeath();
+        }
+
+        public string Name { get; private set; }
+
+        public string Kind { get; private set; }
+
+        public int Age { get; private set; }
+
+        public int AgeOfDeath { get; private set; }
+
+        public bool IsDead { get; private set; } = false;
+
+        public void ShowInfo()
+        {
+            if(IsDead == false)
+            {
+                Console.WriteLine($"Рыбка по имени {Name} вида {Kind} в возрасте {Age} лет.");
+            }
+            else
+            {
+                Console.WriteLine(Name + " умерла.");
+            }
+        }
+
+        public void BecomeOlder()
+        {
+            Age++;
+            
+            if(Age >= AgeOfDeath)
+            {
+                IsDead = true;
+            }
+        }
+
+        private void CreateName()
+        {
+            Name = _names[_random.Next(_names.Count)];
+        }
+
+        private void CreateKind()
+        {
+            Kind = _kinds[_random.Next(_kinds.Count)];
+        }
+
+        private void CreateAgeOfDeath()
+        {
+            int minAge = 50;
+            int maxAge = 100;
+
+            AgeOfDeath = _random.Next(minAge,maxAge);
+        }
+
+        private void CreateAge()
+        {
+            int maxAge = 40;
+
+            Age = _random.Next(maxAge);
+        }
+    }
+}
