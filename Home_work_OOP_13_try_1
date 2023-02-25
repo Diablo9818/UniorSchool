@@ -1,0 +1,176 @@
+using System;
+using System.Collections.Generic;
+
+namespace CarRepairService
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            AutoService autoService = new AutoService();
+            autoService.Work();
+        }
+    }
+
+    class AutoService
+    {
+        private Queue<Car> _cars = new Queue<Car>();
+
+        private Dictionary<string, int> _priceForDetail = new Dictionary<string, int>()
+        {
+            {"Двигатель", 1000 },
+            {"Шина", 500 },
+            {"Колесо", 700 },
+            {"Трансмиссия", 900 },
+            {"Тормоз",950 }
+        };
+
+        private Storage _storage = new Storage();
+        private int _balance = 5000;
+        private int _priceForWork = 1200;
+        private int _prejudice;
+        private int _prejudiceCoefficient = 300;
+        private int _totalPrice;
+        private int _fine = 500;
+
+        public AutoService()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            while (_balance > 0)
+            {
+                foreach (Car car in _cars)
+                {
+                    car.ShowInfo();
+                    _totalPrice = _priceForDetail[car.BrokenDetail.Name] + _priceForWork;
+                    Console.WriteLine($"Цена детали стоит {_priceForDetail[car.BrokenDetail.Name]}. Цена установки стоит {_priceForWork}. С вас {_totalPrice} денег.");
+
+                    if (_storage.IsDetailExist(car.BrokenDetail.Name))
+                    {
+                        while (_storage.ChooseDetail().Name.ToLower() != car.BrokenDetail.Name.ToLower())
+                        {
+                            _prejudice = _priceForDetail[car.BrokenDetail.Name] - _prejudiceCoefficient;
+                            Console.WriteLine($"Извините нашего логиста. Он перепутал деталь. Вот ваша компенсация: {_prejudice} денег.");
+
+                            _balance -= _prejudice;
+                        }
+
+                        if (_balance <= 0)
+                        {
+                            Console.WriteLine("Автосервис обанкротился.");
+                            break;
+                        }
+
+                        car.BecomeRepaired();
+                        _storage.DeleteDetail(car.BrokenDetail.Name);
+                        _balance += _totalPrice;
+                        car.ShowInfo();
+                        Console.WriteLine($"Баланс автосервиса: {_balance} денег.");
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("К сожалению у нас нет нужной детали на складе.");
+                        Console.WriteLine();
+                        _balance -= _fine;
+                    }
+                }
+            } 
+        }
+
+        private void Fill()
+        {
+            int size = 15;
+
+            for (int i = 0; i < size; i++)
+            {
+                _cars.Enqueue(new Car());
+            }
+        }
+    }
+
+    class Car
+    {
+        public Car()
+        {
+
+        }
+
+        public Detail BrokenDetail { get; private set; } = new Detail();
+        public bool IsBrokenDetailExist { get; private set; } = true;
+
+        public void ShowInfo()
+        {
+            if (IsBrokenDetailExist)
+            {
+                Console.WriteLine($"В машине сломана деталь '{BrokenDetail.Name}'.");
+            }
+            else
+            {
+                Console.WriteLine("Машина исправна!");
+            }
+        }
+
+        public void BecomeRepaired()
+        {
+            IsBrokenDetailExist = false;
+        }
+    }
+
+    class Storage
+    {
+        private List<Detail> _details = new List<Detail>();
+        private int _size = 25;
+        private Random _random = new Random();
+         
+        public Storage()
+        {
+            Fill();
+        }
+
+        public void DeleteDetail(string detailName)
+        {
+             int detailIndex = _details.FindIndex(detail => detail.Name.ToLower() == detailName.ToLower());
+            _details.RemoveAt(detailIndex);
+        }
+
+        public Detail ChooseDetail()
+        {
+            return _details[_random.Next(_details.Count)];
+        }
+
+        public bool IsDetailExist(string detailForChange)
+        {
+            return _details.Exists(detail => detail.Name.ToLower() == detailForChange.ToLower());
+        }
+
+        private void Fill()
+        {
+            for (int i = 0; i < _size; i++)
+            {
+                _details.Add(new Detail());
+            }
+        }
+    }
+
+    class Detail
+    {
+        private List<string> _names = new List<string>() { "Двигатель", "Шина", "Колесо", "Трансмиссия", "Тормоз" };
+        private Random _random = new Random();
+
+        public Detail()
+        {
+            CreateName();
+        }
+
+        public string Name { get; private set; }
+
+        private void CreateName()
+        {
+            Name = _names[_random.Next(_names.Count)];
+        }
+    }
+}
