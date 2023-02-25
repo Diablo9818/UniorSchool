@@ -1,0 +1,145 @@
+using System;
+using System.Collections.Generic;
+
+namespace CarRepairService
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            AutoService autoService = new AutoService();
+            autoService.Repair();
+        }
+    }
+
+    class AutoService
+    {
+        private Queue<Car> _cars = new Queue<Car>();
+        private Storage _storage = new Storage();
+        private int _balance = 5000;
+        private int _priceForWork = 1200;
+        private int _totalPrice;
+        private int _fine = 500;
+
+        public AutoService()
+        {
+            Fill();
+        }
+
+        public int PriceForDetail { get; private set; }
+
+
+        public void Repair()
+        {
+            foreach (Car car in _cars)
+            {
+                car.ShowInfo();
+
+                if (_storage.IsDetailExist(car.BrokenDetail.Name))
+                {
+                    Console.WriteLine($"С вас {_totalPrice} денег.");
+                    _balance += _totalPrice;
+                    car.BecomeRepaired();
+                    _cars.Dequeue();
+                }
+                else
+                {
+                    Console.WriteLine("К сожалению у нас нет нужной детали на складе.");
+                    _balance -= _fine;
+                }
+            }
+        }
+
+
+        private void Fill()
+        {
+            int size = 15;
+
+            for (int i = 0; i < size; i++)
+            {
+                _cars.Enqueue(new Car());
+            }
+        }
+    }
+
+    class Car
+    {
+        public Car()
+        {
+
+        }
+
+        public Detail BrokenDetail { get; private set; } = new Detail();
+        public bool IsBrokenDetailExist { get; private set; } = true;
+
+        public void ShowInfo()
+        {
+            if (IsBrokenDetailExist)
+            {
+                Console.WriteLine($"В машине сломана {BrokenDetail.Name}.");
+            }
+            else
+            {
+                Console.WriteLine("Машина исправна!");
+            }
+
+        }
+
+        public void BecomeRepaired()
+        {
+            IsBrokenDetailExist = false;
+        }
+    }
+
+    class Storage
+    {
+        private List<Detail> _details = new List<Detail>();
+        private int _size = 5;
+         
+        public Storage()
+        {
+            Fill();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine("На складе находятся:");
+
+            foreach  (Detail detail in _details)
+            {
+                Console.WriteLine(detail.Name);
+            }
+        }
+
+        public bool IsDetailExist(string detailForChange)
+        {
+            return _details.Exists(detail => detail.Name.ToLower() == detailForChange.ToLower());
+        }
+
+        private void Fill()
+        {
+            for (int i = 0; i < _size; i++)
+            {
+                _details.Add(new Detail());
+            }
+        }
+    }
+
+    class Detail
+    {
+        private List<string> _names = new List<string>() { "Двигатель", "Шина", "Колесо", "Трансмиссия", "Тормоз" };
+        private Random _random = new Random();
+
+        public Detail()
+        {
+            CreateName();
+        }
+
+        public string Name { get; private set; }
+
+        private void CreateName()
+        {
+            Name = _names[_random.Next(_names.Count)];
+        }
+    }
+}
