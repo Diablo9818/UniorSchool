@@ -1,0 +1,196 @@
+using System;
+using System.Collections.Generic;
+
+namespace Zoo
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Manager manager = new Manager();
+            manager.Work();
+        }
+    }
+
+    class Manager
+    {
+        private const string ComeCommand = "1";
+        private const string ExitCommand = "2";
+
+        private Zoo _zoo = new Zoo();
+
+        public void Work()
+        {
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.Write($"Выберите команду: {ComeCommand} - подойти к вольеру {ExitCommand} - уйти: ");
+
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case ComeCommand:
+                        _zoo.ChooseCell();
+                        break;
+                    case ExitCommand:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Введена неверная программа.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+    }
+
+    class Zoo
+    {
+        private int _size = 4;
+        private List<Aviary> _aviaries = new List<Aviary>();
+
+        public Zoo()
+        {
+            Fill();
+        }
+
+        public void ChooseCell()
+        {
+            ShowInfo();
+
+            Console.Write("Введите номер вольера, к которому хотите подойти: ");
+            int userInput;
+
+            bool isSuccesfull = int.TryParse(Console.ReadLine(), out userInput);
+
+            if (isSuccesfull)
+            {
+                Console.WriteLine();
+                _aviaries[userInput-1].ShowInfo();
+            }
+            else
+            {
+                Console.WriteLine("Введено неверное значение.");
+            }
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine();
+            Console.WriteLine($"В зоопарке находится {_size} вольеров.");
+
+            for (int i = 1; i < _aviaries.Count+1; i++)
+            {
+                Console.WriteLine(i + ". вольер." );
+            }
+        }
+
+        private void Fill()
+        {
+            for (int i = 0; i < _size; i++)
+            {
+                _aviaries.Add(new Aviary());
+            }
+        }
+    }
+
+    class Aviary
+    {
+        private List<Animal> _animals = new List<Animal>();
+        private List<string> _animalKinds = new List<string>() { "Корова", "Тигр", "Лев", "Гиппопотам", "Крокодил" };
+        private Random _random = new Random();
+        private int _size;
+
+        public Aviary()
+        {
+            CreateSize();
+            Fill();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"В вольере  находятся {_size} животных :");
+
+            foreach (Animal animal in _animals)
+            {
+                animal.ShowInfo();
+            }
+        }
+
+        public void Fill()
+        {
+            string kind = CreateKind();
+
+            for (int i = 0; i < _size; i++)
+            {
+                    _animals.Add(new Animal(kind));
+            }
+        }
+
+        private string CreateKind()
+        {
+            return _animalKinds[_random.Next(_animalKinds.Count)];
+        }
+
+        private void CreateSize()
+        {
+            int maxSize = 5;
+            int minSize = 1;
+
+            _size = _random.Next(minSize, maxSize);
+        }
+    }
+
+    class Animal
+    {
+        private List<string> _genders = new List<string>() { "Мужской", "Женский" };
+        private Random _random = new Random();
+
+        public Animal( string kind)
+        {
+            Kind = kind;
+            CreateSound();
+            CreateGender();
+        }
+
+        public string Kind { get; private set; }
+        public string Gender { get; private set; }
+        public string Sound { get; private set; }
+
+        public  void ShowInfo()
+        {
+            Console.WriteLine($"Вид животного: {Kind}, пол животного {Gender}. {Kind} издает звук '{Sound}'");
+        }
+
+        private void CreateGender()
+        {
+            Gender = _genders[_random.Next(_genders.Count)];
+        }
+
+        private void CreateSound()
+        {
+            switch (Kind.ToLower())
+            {
+                case "корова":
+                    Sound = "Му-у-у";
+                    break;
+                case "тигр":
+                    Sound = "Ррррау";
+                    break;
+                case "лев":
+                    Sound = "Арррау";
+                    break;
+                case "гиппопотам":
+                    Sound = "Ааааааа";
+                    break;
+                case "крокодил":
+                    Sound = "......";
+                    break;
+            }
+        }
+    }
+}
