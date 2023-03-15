@@ -1,0 +1,203 @@
+using System;
+using System.Collections.Generic;
+
+namespace CarRepairService
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            AutoService autoService = new AutoService();
+            autoService.Work();
+        }
+    }
+
+    class AutoService
+    {
+        private static Database _database = new Database();
+        private Queue<Car> _cars = new Queue<Car>();
+        private Dictionary<string, int> _priceForDetail;
+        private Storage _storage = new Storage();
+        private int _balance = 5000;
+        private int _totalPrice;
+
+
+        public AutoService()
+        {
+            Fill();
+
+            _priceForDetail = new Dictionary<string, int>()
+            {
+            {_database.EngineName, 1000 },
+            {_database.TireName, 500 },
+            {_database.WheelName, 700 },
+            {_database.TransmissionName, 900 },
+            {_database.BrakeName,950 }
+            };
+        }
+
+        public void Work()
+        {
+         int _priceForWork = 1200;
+         int _fine = 500;
+
+            while (_balance > 0 && _cars.Count > 0)
+            {
+                var car = _cars.Dequeue();
+
+                car.ShowInfo();
+                _totalPrice = _priceForDetail[car.BrokenDetail.Name] + _priceForWork;
+                Console.WriteLine($"Цена детали стоит {_priceForDetail[car.BrokenDetail.Name]}. Цена установки стоит {_priceForWork}. С вас {_totalPrice} денег.");
+
+                if (_storage.IsDetailExist(car.BrokenDetail.Name))
+                {
+                    while (_storage.ChooseDetail().Name.ToLower() != car.BrokenDetail.Name.ToLower())
+                    {
+                        PayPrejudice(car);
+                    }
+
+                    if (_balance <= 0)
+                    {
+                        Console.WriteLine("Автосервис обанкротился.");
+                        break;
+                    }
+
+                    RepairCar(car);
+                    ShowBalance();
+                }
+                else
+                {
+                    Console.WriteLine("К сожалению у нас нет нужной детали на складе.");
+                    Console.WriteLine();
+                    _balance -= _fine;
+                }
+            } 
+        }
+
+        private void RepairCar(Car car)
+        {
+            car.BecomeRepaired();
+            _storage.DeleteDetail(car.BrokenDetail.Name);
+            _balance += _totalPrice;
+            car.ShowInfo();
+        }
+
+        private void ShowBalance()
+        {
+            Console.WriteLine($"Баланс автосервиса: {_balance} денег.");
+            Console.WriteLine();
+        }
+
+        private void PayPrejudice(Car car)
+        {
+            int _prejudiceCoefficient = 300;
+            int prejudice = _priceForDetail[car.BrokenDetail.Name] - _prejudiceCoefficient;
+            Console.WriteLine($"Извините нашего логиста. Он перепутал деталь. Вот ваша компенсация: {prejudice} денег.");
+
+                _balance -= prejudice;
+        }
+
+        private void Fill()
+        {
+            int size = 15;
+
+            for (int i = 0; i < size; i++)
+            {
+                _cars.Enqueue(new Car());
+            }
+        }
+    }
+
+    class Car
+    {
+        public Car()
+        {
+
+        }
+
+        public Detail BrokenDetail { get; private set; } = new Detail();
+        public bool IsBrokenDetailExist { get; private set; } = true;
+
+        public void ShowInfo()
+        {
+            if (IsBrokenDetailExist)
+            {
+                Console.WriteLine($"В машине сломана деталь '{BrokenDetail.Name}'.");
+            }
+            else
+            {
+                Console.WriteLine("Машина исправна!");
+            }
+        }
+
+        public void BecomeRepaired()
+        {
+            IsBrokenDetailExist = false;
+        }
+    }
+
+    class Storage
+    {
+        private List<Detail> _details = new List<Detail>();
+         
+        public Storage()
+        {
+            Fill();
+        }
+
+        public void DeleteDetail(string detailName)
+        {
+             int detailIndex = _details.FindIndex(detail => detail.Name.ToLower() == detailName.ToLower());
+            _details.RemoveAt(detailIndex);
+        }
+
+        public Detail ChooseDetail()
+        {
+            Random random = new Random();
+            return _details[random.Next(_details.Count)];
+        }
+
+        public bool IsDetailExist(string detailForChange)
+        {
+            return _details.Exists(detail => detail.Name.ToLower() == detailForChange.ToLower());
+        }
+
+        private void Fill()
+        {
+            int size = 25;
+
+            for (int i = 0; i < size; i++)
+            {
+                _details.Add(new Detail());
+            }
+        }
+    }
+
+    class Detail
+    {
+        private static Database _database = new Database();
+        private List<string> _names = new List<string>() { _database.EngineName, _database.TireName, _database.WheelName, _database.TransmissionName, _database.BrakeName };
+
+        public Detail()
+        {
+            CreateName();
+        }
+
+        public string Name { get; private set; }
+
+        private void CreateName()
+        {
+          Random random = new Random();
+          Name = _names[random.Next(_names.Count)];
+        }
+    }
+
+    class Database
+    {
+        public string EngineName { get; private set; } = "Двигатель";
+        public string TireName { get; private set; } = "Шина";
+        public string WheelName { get; private set; } = "Колесо";
+        public string TransmissionName { get; private set; } = "Трансмиссия";
+        public string BrakeName { get; private set; } = "Тормоз";
+    }
+}
