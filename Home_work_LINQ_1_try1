@@ -1,0 +1,267 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CriminalDatabase
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Database
+    {
+        private CriminalBuilder _criminalBuilder = new CriminalBuilder();
+        private List<Criminal> _criminals = new List<Criminal>();
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            const string FindByWeighCommand = "1";
+            const string FindByHeightCommand = "2";
+            const string FindByNationalityCommand = "3";
+            const string ExitCommand = "4";
+            bool isWork = true;
+
+            while (isWork)
+            {
+                ShowInfo();
+                Console.Write($"Выберите параметр по которому будете искать преступников:\n{FindByWeighCommand} - найти преступников по весу. \n{FindByHeightCommand} - найти преступников по росту. \n{FindByNationalityCommand} - найти преступников по национальности. \n{ExitCommand} - выйти из программы. \nНужный параметр:  ");
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case FindByWeighCommand:
+                        FindByWeight();
+                        break;
+                    case FindByHeightCommand:
+                        FindByHeight();
+                        break;
+                    case FindByNationalityCommand:
+                        FindByNationality();
+                        break;
+                    case ExitCommand:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Введено неверное значение.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        public void ShowInfo()
+        {
+            foreach (Criminal criminal in _criminals)
+            {
+                criminal.ShowInfo();
+            }
+        }
+
+        private void FindByNationality()
+        {
+            Console.Write("Введите национальность: ");
+
+            string UserInputNationality = Console.ReadLine();
+
+            var filteredCriminals = from Criminal criminal in _criminals
+                                    where criminal.Nationality.ToLower() == UserInputNationality.ToLower()
+                                    && criminal.IsInPrison == false
+                                    select criminal;
+
+            if(filteredCriminals.Count() > 0)
+            {
+                Console.WriteLine("_____________________________________________________________________");
+
+                foreach (var criminal in filteredCriminals)
+                {
+                    criminal.ShowInfo();
+                }
+
+                Console.WriteLine("_____________________________________________________________________");
+            }
+            else
+            {
+                Console.WriteLine("В базе данных  нет людей, удовлетворяющих этим параметрам.");
+            }
+        }
+
+        private void FindByWeight()
+        {
+            Console.Write("Введите вес: ");
+
+            int UserInputWeight;
+            bool isSuccess = int.TryParse(Console.ReadLine(), out UserInputWeight);
+
+            if (isSuccess)
+            {
+                var filteredCriminals = from Criminal criminal in _criminals
+                                        where criminal.Weight == UserInputWeight
+                                        && criminal.IsInPrison == false
+                                        select criminal;
+
+                if(filteredCriminals.Count() > 0)
+                {
+                    Console.WriteLine("_____________________________________________________________________");
+
+                    foreach (var criminal in filteredCriminals)
+                    {
+                            criminal.ShowInfo();   
+                    }
+
+                    Console.WriteLine("_____________________________________________________________________");
+                }
+                else
+                {
+                    Console.WriteLine("В базе данных  нет людей, удовлетворяющих этим параметрам.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введено неверное значение.");
+            }
+        }
+
+        private void FindByHeight()
+        {
+            Console.Write("Введите рост: ");
+
+            int UserInputHight;
+            bool isSuccess = int.TryParse(Console.ReadLine(), out UserInputHight);
+
+            if (isSuccess)
+            {
+                var filteredCriminals = from Criminal criminal in _criminals
+                                        where criminal.Height == UserInputHight
+                                        && criminal.IsInPrison == false
+                                        select criminal;
+
+                if(filteredCriminals.Count() > 0)
+                {
+                    Console.WriteLine("_____________________________________________________________________");
+
+                    foreach (var criminal in filteredCriminals)
+                    {
+                        criminal.ShowInfo();
+                    }
+
+                    Console.WriteLine("_____________________________________________________________________");
+                }
+                else
+                {
+                    Console.WriteLine("В базе данных  нет людей, удовлетворяющих этим параметрам.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введено неверное значение.");
+            }
+        }
+
+        private void Fill()
+        {
+            int size = 100;
+
+            for (int i = 0; i < size; i++)
+            {
+                _criminals.Add(_criminalBuilder.CreateCriminal());
+            }
+        }
+    }
+
+    class Criminal
+    {
+        public Criminal(string surname, string name, string fatherName, string nationality, int height, int weight, int age, bool isInPrison)
+        {
+            Surname = surname;
+            Name = name;
+            Fathername = fatherName;
+            Nationality = nationality;
+            Height = height;
+            Weight = weight;
+            Age = age;
+            IsInPrison = isInPrison;
+        }
+
+        public string Surname { get; private set; }
+        public string Name { get; private set; }
+        public string Fathername { get; private set; }
+        public string Nationality { get; private set; }
+        public int Height { get; private set; }
+        public int Weight { get; private set; }
+        public int Age { get; private set; }
+        public bool IsInPrison { get; private set; }
+
+        public void ShowInfo()
+        {
+            if(IsInPrison == true)
+            {
+                Console.WriteLine($"{Surname} {Name} {Fathername}, национальность: {Nationality}, ростом {Height} см, весом {Weight} кг, в возрасте {Age} лет заключен под стражу.");
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine($"{Surname} {Name} {Fathername}, национальность: {Nationality}, ростом {Height} см, весом {Weight} кг, в возрасте {Age} лет находится на свободе.");
+                Console.WriteLine();
+            }
+        }
+    }
+
+    class CriminalBuilder
+    {
+        private List<string> _surnames = new List<string>() { "Зубенко", "Карлеоне", "Скорсезе", "Капоне", "Гундяев", "Япончик" };
+        private List<string> _names = new List<string>() { "Михаил", "Нарзан", "Мартин", "Доминик", "Виктор", "Михаил" };
+        private List<string> _fatherNames = new List<string>() {"Петрович", "Розембаевич", "Турретович", "Елисеевич", "Артемович", "Олегович" };
+        private List<string> _nationality = new List<string>() {"русский", "узбек", "татарин", "кыргыз", "итальянец", "мексиканец" };
+        private Random _random = new Random();
+
+        public Criminal CreateCriminal()
+        {
+            string surname = _surnames[_random.Next(_surnames.Count)];
+            string name = _names[_random.Next(_names.Count)];
+            string fatherName = _fatherNames[_random.Next(_fatherNames.Count)];
+            string nationality = _nationality[_random.Next(_nationality.Count)];
+
+            int maxHight = 210;
+            int minHight = 145;
+
+            int height = _random.Next(minHight, maxHight);
+
+            int maxWeight = 150;
+            int minWeight = 45;
+
+            int weight = _random.Next(minWeight, maxWeight);
+
+            int maxAge = 75;
+            int minAge = 10;
+
+            int age = _random.Next(minAge, maxAge);
+
+            int prisonCount = 2;
+            bool isPrisoned;
+            int prisonChance = _random.Next(prisonCount);
+
+            if(prisonChance == 1)
+            {
+                 isPrisoned = true;
+            }
+            else
+            {
+                isPrisoned = false;
+            }
+
+            return new Criminal(surname, name, fatherName, nationality, height, weight, age, isPrisoned);
+        }
+    }
+}
