@@ -1,0 +1,94 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PrisonersDataBase
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Database
+    {
+        private PrisonerBuilder _prisonerBuilder = new PrisonerBuilder();
+        private List<Prisoner> _prisoners = new List<Prisoner>();
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            ShowInfo();
+            Amnesty();
+            ShowInfo();
+        }
+
+        public void Amnesty()
+        {
+            string crimeNameForAmnesty = "Антиправительственное";
+            Console.WriteLine("---------------------------------------------------------");
+            Console.WriteLine($"Произошла амнистия за преступления по типу {crimeNameForAmnesty}.");
+            Console.WriteLine("---------------------------------------------------------");
+            _prisoners = _prisoners.Where(prisoner => prisoner.Crime.ToLower() != crimeNameForAmnesty.ToLower()).ToList();
+        }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine("В тюрьме находятся: ");
+
+            foreach (var prisoner in _prisoners)
+            {
+                prisoner.ShowInfo();
+            }
+        }
+
+        private void Fill()
+        {
+            int size = 20;
+
+            for (int i = 0; i < size; i++)
+            {
+               _prisoners.Add(_prisonerBuilder.CreatePrisoner());
+            }
+        }
+    }
+
+    class Prisoner
+    {
+        public Prisoner(string name, string crime)
+        {
+            Name = name;
+            Crime = crime;
+        }
+
+        public string Name { get; private set; }
+        public string Crime { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Заключенный {Name}  осужден за {Crime} преступление.");
+        }
+    }
+
+    class PrisonerBuilder
+    {
+        private List<string> _names = new List<string>() { "Иванов Иван Иваныч", "Сидоров Иван Кузьмич", "Петров Иван Степаныч", "Зашиворотенко Иван Фомич", "Егоров Егор Егорович " };
+        private List<string> _crimes = new List<string>() { "Антиправительственное", "Антиэкономическое", "Антисоциальное", "Антиюмористическое" };
+        private Random _random = new Random();
+
+        public Prisoner CreatePrisoner()
+        {
+            string name = _names[_random.Next(_names.Count)];
+            string crime = _crimes[_random.Next(_crimes.Count)];
+
+            return new Prisoner(name, crime);
+        }
+    }
+}
