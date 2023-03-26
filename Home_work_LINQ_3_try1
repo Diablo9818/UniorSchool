@@ -1,0 +1,156 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Hospital
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Database
+    {
+        private PatientBuilder _patientBuilder = new PatientBuilder();
+        private List<Patient> _patients = new List<Patient>();
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            const string CommandSortByName = "1";
+            const string CommandSortByAge = "2";
+            const string CommandSortByDisease = "3";
+            const string CommandExitProgram = "4";
+
+            string menu = $"{CommandSortByName} - Отсортировать всех больных по ФИО. \n{CommandSortByAge} - Отсортировать всех больных по возрасту. \n{CommandSortByDisease} - Вывести больных с определенным заболеванием.  \n{CommandExitProgram} - Выход";
+            bool isWork = true;
+
+            while (isWork)
+            {
+                Console.WriteLine("Список команд:");
+                Console.WriteLine(menu);
+                Console.Write("\nВведите команду:");
+                string userInputCommand = Console.ReadLine();
+
+                switch (userInputCommand)
+                {
+                    case CommandSortByName:
+                        ShowFiltered(SortByName());
+                        break;
+                    case CommandSortByAge:
+                        ShowFiltered(SortByAge());
+                        break;
+                    case CommandSortByDisease:
+                        SortByDisease();
+                        break;
+                    case CommandExitProgram:
+                        isWork = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неправильно введена команда.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private void ShowFiltered(IEnumerable<Patient> filtered)
+        {
+            foreach (var patient in filtered)
+            {
+                patient.ShowInfo();
+            }
+        }
+
+        private IEnumerable<Patient> SortByName()
+        {
+            var filtered = from patient in _patients orderby patient.Name select patient;
+
+            return filtered;
+        }
+
+        private void SortByDisease()
+        {
+            Console.Write("Введите болезнь: ");
+            string userInputDisease = Console.ReadLine();
+            bool isDiseaseExists = _patients.Any(patient => patient.Disease.ToLower() == userInputDisease.ToLower());
+
+            if (isDiseaseExists)
+            {
+                IEnumerable<Patient> filtered = from patient in _patients where patient.Disease.ToLower() == userInputDisease.ToLower() select patient;
+                
+                ShowFiltered(filtered);
+            }
+            else
+            {
+                Console.WriteLine("Такой болезни нет ни у одного пациента в данной клинике.");
+            }
+        }
+
+        private IEnumerable<Patient> SortByAge()
+        {
+            var filtered = from patient in _patients orderby patient.Age select patient;
+
+            return filtered;
+        }
+
+        private void Fill()
+        {
+            int size = 30;
+
+            for (int i = 0; i < size; i++)
+            {
+                _patients.Add(_patientBuilder.CreatePatient());
+            }
+        }
+    }
+
+    class Patient
+    {
+        public Patient(string name, string disease, int age)
+        {
+            Name = name;
+            Disease = disease;
+            Age = age;
+        }
+
+        public string Name { get; private set; }
+        public string Disease { get; private set; }
+        public int Age { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"ФИО: {Name}. возраст: {Age}. Болезнь: {Disease}.");
+        }
+    }
+
+    class PatientBuilder
+    {
+        private List<string> _names = new List<string>() { "Иванов Иван Иваныч", "Сидоров Иван Кузьмич", "Петров Иван Степаныч", "Зашиворотенко Иван Фомич", "Егоров Егор Егорович " };
+        private List<string> _diseases = new List<string>() {"сифилис", "инфаркт", "волчанка", "аппендицит", "аденокарцинома", "аскаридоз", "саркаидоз", "грипп" };
+        private Random _random = new Random();
+
+        public Patient CreatePatient()
+        {
+            string name = _names[_random.Next(_names.Count)];
+            string disease = _diseases[_random.Next(_diseases.Count)];
+
+            int maxAge = 90;
+            int minAge = 18;
+
+            int age = _random.Next(minAge, maxAge);
+
+            return new Patient(name, disease, age);
+        }
+    }
+}
