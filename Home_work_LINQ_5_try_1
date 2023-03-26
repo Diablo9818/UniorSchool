@@ -1,0 +1,106 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace FoodChecker
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Database
+    {
+        private List<Stew> _stews = new List<Stew>();
+        private StewBuilder _stewBuilder = new StewBuilder();
+
+        private int _todayYear = 2023;
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            Console.WriteLine("Вся имеющаяся на складе тушенка: ");
+            ShowInfo();
+            Console.WriteLine("Просроченная:");
+            FilterAddledStew();
+        }
+
+        private void FilterAddledStew()
+        {
+            var filtered = from stew in _stews where stew.ExpirationDate <= _todayYear select stew;
+
+            foreach (var stew in filtered)
+            {
+                stew.ShowInfo();
+            }
+        }
+
+        private void ShowInfo()
+        {
+            foreach (Stew stew in _stews)
+            {
+                stew.ShowInfo();
+            }
+        }
+
+        private void Fill()
+        {
+            int size = 50;
+
+            for (int i = 0; i < size; i++)
+            {
+                _stews.Add(_stewBuilder.Create());
+            }
+        }
+    }
+
+    class Stew
+    {
+        public Stew(string name, int ageOfCreation, int expirationDate)
+        {
+            Name = name;
+            AgeOfCreation = ageOfCreation;
+            ExpirationDate = expirationDate;
+        }
+
+        public string Name { get; private set; }
+        public int AgeOfCreation { get; private set; }
+        public int ExpirationDate { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Банка тушенки '{Name}' произведена {AgeOfCreation} года. Срок годности до {ExpirationDate} года.");
+        }
+    }
+
+    class StewBuilder
+    {
+        private List<string> _names = new List<string>() { "Варяжская", "Сибирская", "ГлавПромСельхозПродукт", "Военная", "Моряцкая", "Купеческая" };
+        Random _random = new Random();
+
+        public Stew Create()
+        {
+            string name = _names[_random.Next(_names.Count)];
+
+            int maxAge = 2023;
+            int minAge = 1975;
+
+            int ageOfCreation = _random.Next(minAge, maxAge);
+
+            int maxDate = 2075;
+            int minDate = 2005;
+
+            int expirationDate = _random.Next(minDate, maxDate);
+
+            return new Stew(name, ageOfCreation, expirationDate);
+        }
+    }
+}
