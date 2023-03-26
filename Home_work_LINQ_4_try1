@@ -1,0 +1,118 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PlayersServerDataBase
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    public class Database
+    {
+        private PlayerBuilder _playerBuilder = new PlayerBuilder();
+        private List<Player> _players = new List<Player>();
+        private int _playersNumberToShow = 3;
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void Work()
+        {
+            Console.WriteLine("Весь список игроков:");
+            ShowInfo();
+            Console.WriteLine("---------------------------------------------------------------------");
+            Console.WriteLine($"Топ-{_playersNumberToShow} сильнейших игроков:");
+            TopByStrength();
+            Console.WriteLine("---------------------------------------------------------------------");
+            Console.WriteLine($"Топ-{_playersNumberToShow} высокоуровневых игроков:");
+            TopByLevel();
+        }
+
+        private void TopByStrength()
+        {
+            var filtered = _players.OrderByDescending(player => player.Strength).Take(_playersNumberToShow);
+
+            foreach (var player in filtered)
+            {
+                player.ShowInfo();
+            }
+        }
+        private void TopByLevel()
+        {
+            var filtered = _players.OrderByDescending(player => player.Level).Take(_playersNumberToShow);
+
+            foreach (var player in filtered)
+            {
+                player.ShowInfo();
+            }
+        }
+
+        private void ShowInfo()
+        {
+            foreach (Player player in _players)
+            {
+                player.ShowInfo();
+            }
+        }
+
+        private void Fill()
+        {
+            int size = 10;
+
+            for (int i = 0; i < size; i++)
+            {
+                _players.Add(_playerBuilder.Create());
+            }
+        }
+    }
+
+    class Player
+    {
+        public Player(string name, int level, int strength)
+        {
+            Name = name;
+            Level = level;
+            Strength = strength;
+        }
+
+        public string Name { get; private set; }
+        public int Level { get; private set; }
+
+        public int Strength { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"Игрок {Name}: уровень {Level}, сила {Strength}");
+        }
+    }
+
+    class PlayerBuilder
+    {
+        private List<string> _names = new List<string>() { "Масяня", "Джо-джо", "Стен", "КиЛлЕр@2007", "темак47", "Я_нуб_ты_друп", "Kristallik", "ПуЛи_От_БаБуЛи", 	"YбИuЦа_КрИпЕrОв", "3JlOu_XJlE6yWEK " };
+        private Random _random = new Random();
+
+        public Player Create()
+        {
+            string name = _names[_random.Next(_names.Count)];
+
+            int minLevel = 1;
+            int maxLevel = 81;
+
+            int level = _random.Next(minLevel, maxLevel);
+
+            int maxStrength = 10;
+            int minStrength = 1;
+
+            int strength = _random.Next(minStrength, maxStrength);
+            return new Player(name, level, strength);
+        }
+    }
+}
