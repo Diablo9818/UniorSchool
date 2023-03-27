@@ -1,0 +1,110 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace UniteSoldiers
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.Work();
+        }
+    }
+
+    class Database
+    {
+        private List<Soldier> _firstArmy = new List<Soldier>();
+        private List<Soldier> _secondArmy = new List<Soldier>();
+        private SoldierBuilder _soldierBuilder = new SoldierBuilder();
+
+        public Database()
+        {
+            Fill(_firstArmy);
+            Fill(_secondArmy);
+        }
+
+        public void Work()
+        {
+            char firstLetter = 'Б';
+            Console.WriteLine("Солдаты в первом отряде:");
+            ShowInfo(_firstArmy);
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine("Солдаты во втором отряде:");
+            ShowInfo(_secondArmy);
+            Console.WriteLine($"Вышел приказ, по которому все солдаты из первого отряда, у которорых фамилия начинается на буку '{firstLetter}' переходят во второй отряд.");
+            MoveSoldiers(firstLetter);
+            Console.WriteLine("------------------------------------");
+            ShowInfo(_secondArmy);
+        }
+
+        public void ShowInfo(List<Soldier> army)
+        {
+            foreach (var soldier in army)
+            {
+                soldier.ShowInfo();
+            }
+        }
+
+        private void MoveSoldiers(char firstLetter)
+        {
+            var soldiersToMove = from soldier in _firstArmy  where soldier.Surname.StartsWith(firstLetter) select soldier;
+
+            foreach (var soldier in soldiersToMove)
+            {
+                _secondArmy.Add(soldier);
+            }
+
+            for (int i = _firstArmy.Count - 1; i >=0; i--)
+            {
+                if (_firstArmy[i].Surname.StartsWith(firstLetter))
+                {
+                    _firstArmy.RemoveAt(i);
+                }
+            }
+        }
+
+        private void Fill(List<Soldier> army)
+        {
+            int size = 5;
+
+            for (int i = 0; i < size; i++)
+            {
+                army.Add(_soldierBuilder.CreateSoldier());
+            }
+        }
+    }
+
+    class Soldier
+    {
+        public Soldier(string name, string surname)
+        {
+            Name = name;
+            Surname = surname;
+        }
+
+        public string Name { get; private set; }
+        public string Surname { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($" Солдат {Surname} {Name}.");
+        }
+    }
+
+    class SoldierBuilder
+    {
+        private List<string> _names = new List<string>() { "Василий", "Пётр", "Евгений", "Виталий", "Афанасий", "Вергилий", "Эристокл", "Герасим", "Виктор", "Георгий", "Александр", "Мальчик молодой" };
+        private List<string> _surnames = new List<string>() {"Шматко", "Прокопенко", "Березенко", "Борчук", "Белогородов", "Табуретка", "Бывалов", "Гойденко", "Быковенко", "Козлов" };
+        private Random _random = new Random();
+
+        public Soldier CreateSoldier()
+        {
+            string name = _names[_random.Next(_names.Count)];
+            string surname = _surnames[_random.Next(_surnames.Count)];
+
+            return new Soldier(name, surname);
+        }
+    }
+}
