@@ -1,0 +1,84 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SoldierReport
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Database database = new Database();
+            database.ShowNameAndRank();
+        }
+    }
+
+    class Database
+    {
+        private List<Soldier> _soldiers = new List<Soldier>();
+        private SoldierBuilder _soldierBuilder = new SoldierBuilder();
+
+        public Database()
+        {
+            Fill();
+        }
+
+        public void ShowNameAndRank()
+        {
+            var filteredSoldiers = _soldiers.Select(soldier => new { Name = soldier.Name, Rank = soldier.Rank });
+
+            foreach (var soldier in filteredSoldiers)
+            {
+                Console.WriteLine($"Звание: {soldier.Rank}, имя: {soldier.Name}.");
+            }
+        }
+
+        private void Fill()
+        {
+            int size = 40;
+
+            for (int i = 0; i < size; i++)
+            {
+                _soldiers.Add(_soldierBuilder.CreateSoldier());
+            }
+        }
+    }
+
+    class Soldier
+    {
+        public Soldier(string name, string weapon, string rank, int serviceInMonth)
+        {
+            Name = name;
+            Weapon = weapon;
+            Rank = rank;
+            ServiceInMonth = serviceInMonth;
+        }
+
+        public string Name { get; private set; }
+        public string Weapon { get; private set; }
+        public string Rank { get; private set; }
+        public int ServiceInMonth { get; private set; }
+    }
+
+    class SoldierBuilder
+    {
+        private List<string> _names = new List<string>() {"Василий", "Пётр", "Евгений", "Виталий", "Афанасий", "Вергилий", "Эристокл", "Герасим", "Виктор", "Георгий", "Александр", "Мальчик молодой" };
+        private List<string> _weapons = new List<string>() {"Винтовка", "Арбалет", "Лук", "Копье", "Маузер", "Камень", "РПГ-7", "Гаубица", "Ракеный комплекс Буратино - 14" };
+        private List<string> _ranks = new List<string>() {"Рядовой", "Ефрейтор", "Младший лейтенант", "Лейтенант", "Старший лейтенант", "Майор", "Генерал" };
+        private Random _random = new Random();
+
+        public Soldier CreateSoldier()
+        {
+            string name = _names[_random.Next(_names.Count)];
+            string weapon = _weapons[_random.Next(_weapons.Count)];
+            string rank = _ranks[_random.Next(_ranks.Count)];
+
+            int maxServiceInMonth = 24;
+            int minServiceInMonth = 12;
+
+            int serviceInMonth = _random.Next(minServiceInMonth, maxServiceInMonth);
+
+            return new Soldier(name, weapon, rank, serviceInMonth);
+        }
+    }
+}
