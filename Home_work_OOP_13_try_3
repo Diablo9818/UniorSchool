@@ -1,0 +1,440 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CarRepairService
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            AutoService autoService = new AutoService();
+            autoService.Work();
+        }
+    }
+
+    class AutoService
+    {
+        private static Database _database = new Database();
+        private CarCreator _carCreator = new CarCreator();
+        private List<Car> _cars = new List<Car>();
+        private Dictionary<string, int> _priceForDetail;
+        private Storage _storage = new Storage();
+        private int _totalPrice;
+        private int _balance = 5000;
+
+        public AutoService()
+        {
+            Fill();
+            _priceForDetail = _database.GetDatabaseDetails();
+        }
+
+        public void Work()
+        {
+            const string RepairCarCommand = "1";
+            const string BuyDetailsCommand = "2";
+            const string ShowBalanceCommand = "3";
+            const string ShowDetailsInTheStoreCommand = "4";
+            const string ExitCommand = "5";
+
+            bool isWorking = true;
+
+            while (isWorking)
+            {
+                Console.Write($"Список команд:\n{RepairCarCommand} - чтобы починить машину.\n{BuyDetailsCommand} - чтобы купить детали для склада.\n{ShowBalanceCommand} - чтобы посмотреть баланс автосервиса.\n{ShowDetailsInTheStoreCommand} - чтобы посмотреть детали, которые лежат на складе.\n{ExitCommand} - чтобы выйти.\n");
+                Console.Write("Выберите команду:");
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case RepairCarCommand:
+                        RepairCar();
+                        break;
+                    case BuyDetailsCommand:
+                        BuyDetails();
+                        break;
+                    case ShowBalanceCommand:
+                        ShowBalance();
+                        break;
+                    case ShowDetailsInTheStoreCommand:
+                        _storage.ShowDetails();
+                        break;
+                    case ExitCommand:
+                        isWorking = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неверная команда.");
+                        break;
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private void BuyDetails()
+        {
+            Console.WriteLine("Список деталей, доступных для покупки: ");
+            _database.ShowDetailsNames();
+            Console.Write("Введите номер детали, которую хотите купить: ");
+            int userInput;
+            bool isSuccesfull = int.TryParse(Console.ReadLine(), out userInput);
+
+            if (isSuccesfull && userInput < _database.GetDetailsNameList().Count)
+            {
+                if(_balance >= _priceForDetail[_database.GetDetailName(userInput)])
+                {
+                    _storage.AddDetail(_database.GetDetailName(userInput));
+                    _balance -= _priceForDetail[_database.GetDetailName(userInput)];
+                    Console.WriteLine($" Покупка детали '{_database.GetDetailName(userInput)}' за {_priceForDetail[_database.GetDetailName(userInput)]} денег прошла успешно.");
+                    ShowBalance();
+
+                }
+                else
+                {
+                    Console.WriteLine("Недостаточно средств.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Введено неккоректное значение.");
+            }
+        }
+
+        private void RepairCar()
+        {
+            if(_balance > 0)
+            {
+                int priceForWork = 1200;
+                int fine = 500;
+
+                int carNumber = ChooseCar();
+                Console.ReadKey();
+                Console.Clear();
+
+                if (carNumber >= 0)
+                {
+                    _cars[carNumber].ShowInfo();
+                    _totalPrice = CountPrice(priceForWork, carNumber);
+                    ShowPrice(priceForWork, _totalPrice, carNumber);
+                    ReplaceDetails(_cars[carNumber], fine);
+                    _totalPrice = 0;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("Такой машины нет.");
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Автосервис обанкротился!");
+            }
+
+        }
+
+        private void ReplaceDetails(Car car, int fine)
+        {
+            bool canFixCar = true;
+
+            while (car.GetCarDetails().Any(detail => detail.IsBroken == true) && canFixCar)
+            {
+                int detailNumber = ChooseDetailNumber();
+
+                if( _storage.GetStorageDetails().Any(detail => detail.Name.ToLower() == car.GetCarDetails()[detailNumber].Name.ToLower()))
+                {
+                    car.GetCarDetails()[detailNumber].Fix();
+                    _storage.DeleteDetail(car.GetCarDetails()[detailNumber].Name);
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("К сожалению, у нас нет нужной детали на складе.");
+                    _balance -= fine;
+                    canFixCar = false;
+                }
+            }
+
+            if (car.GetCarDetails().All(detail => detail.IsBroken == false))
+            {
+                Console.WriteLine("Машина исправна!");
+                _balance += _totalPrice;
+                _cars.Remove(car);
+            }
+        }
+
+        private int ChooseCar()
+        {
+            int userInputNumber = -1;
+            bool isSucces = false;
+
+            while (!isSucces)
+            {
+                ShowCars();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write("Выберите машину, которую хотите починить и введите ее номер: ");
+                isSucces = int.TryParse(Console.ReadLine(), out userInputNumber);
+
+                if (!isSucces)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("Введено некорректное значение.");
+                }
+            }
+
+            return userInputNumber;
+        }
+
+        private void ShowCars()
+        {
+            for (int i = 0; i < _cars.Count; i++)
+            {
+                Console.Write(i + ". ");
+                _cars[i].ShowInfo();
+            }
+        }
+
+        private int ChooseDetailNumber()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Введите номер детали, которую хотите заменить: ");
+            int detailNumber;
+            bool isSucces = int.TryParse(Console.ReadLine(), out detailNumber);
+
+            if (isSucces)
+            {
+                return detailNumber;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Введен некорректный номер детали.");
+            }
+
+             return detailNumber = -1;
+        }
+
+        private void ShowPrice(int priceForWork, int totalPrice, int carNumber)
+        {
+            var carBrokenDetails = from detail in _cars[carNumber].GetCarDetails() where detail.IsBroken == true select detail;
+
+            foreach (Detail detail in carBrokenDetails)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"Цена детали {detail.Name}  стоит {_priceForDetail[detail.Name]}. Цена установки стоит {priceForWork}.");
+            }
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"С вас {totalPrice} денег.");
+        }
+
+        private int CountPrice(int priceForWork,int carNumber)
+        {
+            int totalPrice = 0;
+
+            var carBrokenDetails = from detail in _cars[carNumber].GetCarDetails() where detail.IsBroken == true select detail;
+
+            foreach (Detail detail in carBrokenDetails)
+            {
+                totalPrice += _priceForDetail[detail.Name] + priceForWork;
+            }
+
+            return totalPrice;
+        }
+
+        private void ShowBalance()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"Баланс автосервиса: {_balance} денег.");
+            Console.WriteLine();
+        }
+
+        private void Fill()
+        {
+            int size = 15;
+
+            for (int i = 0; i < size; i++)
+            {
+                _cars.Add(_carCreator.Create());
+            }
+        }
+    }
+
+    class CarCreator
+    {
+        private Database _database = new Database();
+      
+        public Car Create()
+        {
+            Random random = new Random();
+
+            List<Detail> details = new List<Detail>();
+
+            int numberForWorkingDetail = 0;
+            int numberForBrokenDetail = 1;
+            int numberForCurrentDetail;
+
+            for (int i = 0; i < _database.GetDetailsNameList().Count; i++)
+            {
+                numberForCurrentDetail = random.Next(numberForWorkingDetail, numberForBrokenDetail + 1);
+
+                if (numberForCurrentDetail == numberForBrokenDetail)
+                {
+                    details.Add(new Detail(_database.GetDetailName(i), true));
+                }
+                else if (numberForCurrentDetail == numberForWorkingDetail)
+                {
+                    details.Add(new Detail(_database.GetDetailName(i), false));
+                }
+            }
+
+            return new Car(details);
+        }
+    }
+
+    class Car
+    {
+        private List<Detail> _detailsInCar;
+
+        public Car(List<Detail> details)
+        {
+            _detailsInCar = details;
+        }
+
+        public void ShowInfo()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("В машине:");
+
+            for (int i = 0; i < _detailsInCar.Count; i++)
+            {
+                if (_detailsInCar[i].IsBroken == true)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(i + ". Деталь " + "'" + _detailsInCar[i].Name + "'" + " сломана.");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine(i + ". Деталь " + "'" + _detailsInCar[i].Name + "'" + " исправна.");
+                }
+            }
+        }
+
+        public List<Detail> GetCarDetails()
+        {
+            return _detailsInCar;
+        }
+    }
+
+    class Storage
+    {
+        private Database _database = new Database();
+        private List<Detail> _details = new List<Detail>();
+        private Random _random = new Random(); 
+         
+        public Storage()
+        {
+            Fill();
+        }
+
+        public void ShowDetails()
+        {
+            Console.WriteLine("На складе имеются:");
+
+            foreach  (Detail detail  in _details)
+            {
+                Console.WriteLine(detail.Name);
+            }
+        }
+
+        public List<Detail> GetStorageDetails()
+        {
+            return _details;
+        }
+
+        public void DeleteDetail(string detailName)
+        {
+             int detailIndex = _details.FindIndex(detail => detail.Name.ToLower() == detailName.ToLower());
+            _details.RemoveAt(detailIndex);
+        }
+
+        public void AddDetail(string name)
+        {
+            _details.Add(new Detail(name, false));
+        }
+
+        public bool IsDetailExist(string detailForChange)
+        {
+            return _details.Exists(detail => detail.Name.ToLower() == detailForChange.ToLower());
+        }
+
+        private void Fill()
+        {
+            int size = 30;
+
+            for (int i = 0; i < size; i++)
+            {
+                _details.Add(new Detail(_database.GetDetailName(_random.Next(_database.GetDetailsNameList().Count)),false));
+            }
+        }
+    }
+
+    class Detail
+    {
+        public Detail(string name, bool isBroken)
+        {
+            Name = name;
+            IsBroken = isBroken;
+        }
+
+        public string Name { get; private set; }
+
+        public bool IsBroken { get; private set; }
+
+        public void Fix()
+        {
+            Console.WriteLine("деталь " + "'" + Name + "'" +  "исправна.");
+            IsBroken = false;
+        }
+
+    }
+
+    class Database
+    {
+        private static List<string> _detailsNames = new List<string>() { "Двигатель", "Шина", "Колесо", "Трансмиссия", "Тормоз" };
+        private Dictionary<string, int> _priceForDetail = new Dictionary<string, int>()
+            {
+            {_detailsNames[0], 1000 },
+            {_detailsNames[1], 500 },
+            { _detailsNames[2], 700 },
+            { _detailsNames[3], 900 },
+            { _detailsNames[4],950 }
+            };
+
+        public List<string> GetDetailsNameList()
+        {
+            return new List<string>(_detailsNames);
+        }
+
+        public void ShowDetailsNames()
+        {
+            for (int i = 0; i < _detailsNames.Count; i++)
+            {
+                Console.WriteLine(i + " " + _detailsNames[i]);
+            }
+        }
+
+        public string GetDetailName(int i)
+        {
+            return _detailsNames[i];
+        }
+
+        public Dictionary<string, int> GetDatabaseDetails()
+        {
+           return new Dictionary<string,int>(_priceForDetail);
+        }
+    }
+}
