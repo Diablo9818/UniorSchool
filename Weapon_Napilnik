@@ -1,0 +1,31 @@
+class Weapon
+{
+    private uint _damage;
+    private uint _bullets;
+
+    public void Fire(Player player)
+    {
+        player.TakeDamage(_damage);
+        _bullets -= 1;
+    }
+}
+
+class Player
+{
+    private uint _health;
+
+    public void TakeDamage(uint damage)
+    {
+        _health -= damage;
+    }
+}
+
+class Bot
+{
+    private Weapon _weapon;
+
+    public void OnSeePlayer(Player player)
+    {
+        _weapon.Fire(player);
+    }
+}
