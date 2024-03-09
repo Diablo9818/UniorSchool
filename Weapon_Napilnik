@@ -1,5 +1,3 @@
-using static System.Net.Mime.MediaTypeNames;
-
 class Weapon
 {
     private int _damage;
@@ -22,6 +20,9 @@ class Weapon
     {
         if(_bullets <= 0) 
             throw new ArgumentOutOfRangeException($"{nameof(_bullets)} can't be negative.");
+
+        if (player == null)
+            throw new ArgumentNullException($"{nameof(player)} is null");
 
         player.TakeDamage(_damage);
         _bullets --;
@@ -49,7 +50,7 @@ class Player
 
 class Bot
 {
-    private Weapon _weapon;
+    private readonly Weapon _weapon;
 
     public Bot(Weapon weapon)
     {
@@ -63,9 +64,6 @@ class Bot
     {
         if (player == null)
             throw new ArgumentNullException($"{nameof(player)} is null");
-
-        if (_weapon == null)
-            throw new ArgumentNullException($"{nameof(_weapon)} is null");
 
         _weapon.Fire(player);
     }
