@@ -1,0 +1,168 @@
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Good iPhone12 = new Good("IPhone 12");
+        Good iPhone11 = new Good("IPhone 11");
+
+        Console.WriteLine(iPhone12.Name);
+        Console.WriteLine(iPhone11.Name);
+
+        Warehouse warehouse = new Warehouse();
+
+        Shop shop = new Shop(warehouse);
+
+        warehouse.Delive(iPhone12, 10);
+        warehouse.Delive(iPhone11, 1);
+
+        ////Вывод всех товаров на складе с их остатком
+        warehouse.PrintGoods();
+
+        Cart cart = shop.Cart();
+        cart.Add(iPhone12, 4);
+        cart.Add(iPhone11, 3); //при такой ситуации возникает ошибка так, как нет нужного количества товара на складе
+
+        ////Вывод всех товаров в корзине
+        cart.PrintGoods();
+
+        Console.WriteLine(cart.Order().Paylink);
+
+        cart.Add(iPhone12, 9); //Ошибка, после заказа со склада убираются заказанные товары
+    }
+}
+
+public class Good
+{
+    private readonly string _name;
+
+    public string Name => _name;
+
+    public Good(string name)
+    {
+        _name = name;
+    }
+}
+
+public class Warehouse
+{
+    private Dictionary<Good, int> _storage = new Dictionary<Good, int>();
+
+    public void Remove(Good good, int ammount)
+    {
+        if (ammount < 0)
+            throw new ArgumentOutOfRangeException($"{nameof(ammount)} can't be less than zero.");
+
+        if (good == null)
+            throw new ArgumentNullException($"{nameof(good)} is null");
+
+        if (_storage.ContainsKey(good))
+        {
+            _storage[good] -= ammount;
+            if (_storage[good] <= 0)
+                _storage.Remove(good);
+        }
+    }
+
+    public void PrintGoods()
+    {
+        Console.WriteLine("This Warehouse has:");
+
+        foreach (var item in _storage)
+        {
+            Console.WriteLine($"{item.Key.Name}: {item.Value}");
+        }
+    }
+
+
+    public bool HasEnough(Good good, int quantity)
+    {
+        return _storage.ContainsKey(good) && _storage[good] >= quantity;
+    }
+
+    public void Delive(Good good, int ammount)
+    {
+        if (ammount <= 0)
+            throw new ArgumentOutOfRangeException($"{nameof(ammount)} can't be negative.");
+
+        if (good == null)
+            throw new ArgumentNullException($"{nameof(good)} is null");
+
+        _storage.Add(good, ammount);
+    }
+}
+
+public class Shop
+{
+    private Warehouse _warehouse;
+
+    public Shop(Warehouse warehouse)
+    {
+        _warehouse = warehouse ?? throw new ArgumentNullException($"{nameof(warehouse)} is null");
+    }
+
+    public Cart Cart()
+    {
+        return new Cart(_warehouse);
+    }
+}
+
+public class Cart
+{
+    private Dictionary<Good, int> _cartSpace = new Dictionary<Good, int>();
+    private Warehouse _warehouse;
+
+    public Cart(Warehouse warehouse)
+    {
+        _warehouse = warehouse ?? throw new ArgumentNullException($"{nameof(warehouse)} is null");
+    }
+
+    public void Add(Good good, int ammount)
+    {
+        if (ammount <= 0)
+            throw new ArgumentOutOfRangeException($"{nameof(ammount)} can't be negative.");
+
+        if (good == null)
+            throw new ArgumentNullException($"{nameof(good)} is null");
+
+        if (_warehouse.HasEnough(good, ammount))
+        {
+            if (_cartSpace.ContainsKey(good))
+                _cartSpace[good] += ammount;
+            else
+                _cartSpace.Add(good, ammount);
+
+            _warehouse.Remove(good, ammount);
+        }
+        else
+        {
+            throw new ArgumentException($"Not enough {good.Name} in stock.");
+        }
+    }
+
+    public void PrintGoods()
+    {
+        Console.WriteLine("This Cart has:");
+
+        foreach (var item in _cartSpace)
+        {
+            Console.WriteLine($"{item.Key.Name}: {item.Value}");
+        }
+    }
+
+    public Order Order()
+    {
+        return new Order(_cartSpace);
+    }
+}
+
+public class Order
+{
+    private Dictionary<Good, int> items;
+
+    public Order(Dictionary<Good, int> items)
+    {
+        this.items = items;
+    }
+    public string Paylink => "Payment link generated";
+}
