@@ -32,21 +32,30 @@ class Program
     }
 }
 
+public interface IWarehouse
+{
+    void Remove(Good good, int amount);
+    bool HasEnough(Good good, int quantity);
+    void Delive(Good good, int amount);
+    void PrintGoods();
+}
+
 public class Good
 {
-    private readonly string _name;
-
-    public string Name => _name;
+    public string Name { get; }
 
     public Good(string name)
     {
-        _name = name;
+        if (name == null)
+            throw new ArgumentNullException($"{nameof(name)} is null");
+
+        Name = name;
     }
 }
 
-public class Warehouse
+public class Warehouse: IWarehouse
 {
-    private Dictionary<Good, int> _storage = new Dictionary<Good, int>();
+    readonly private Dictionary<Good, int> _storage = new Dictionary<Good, int>();
 
     public void Remove(Good good, int ammount)
     {
@@ -59,6 +68,7 @@ public class Warehouse
         if (_storage.ContainsKey(good))
         {
             _storage[good] -= ammount;
+
             if (_storage[good] <= 0)
                 _storage.Remove(good);
         }
@@ -80,23 +90,30 @@ public class Warehouse
         return _storage.ContainsKey(good) && _storage[good] >= quantity;
     }
 
-    public void Delive(Good good, int ammount)
+    public void Delive(Good good, int amount)
     {
-        if (ammount <= 0)
-            throw new ArgumentOutOfRangeException($"{nameof(ammount)} can't be negative.");
+        if (amount <= 0)
+            throw new ArgumentOutOfRangeException($"{nameof(amount)} can't be negative.");
 
         if (good == null)
             throw new ArgumentNullException($"{nameof(good)} is null");
 
-        _storage.Add(good, ammount);
+        if (_storage.ContainsKey(good))
+        {
+            _storage[good] += amount;
+        }
+        else
+        {
+            _storage.Add(good, amount);
+        }
     }
 }
 
 public class Shop
 {
-    private Warehouse _warehouse;
+    private IWarehouse _warehouse;
 
-    public Shop(Warehouse warehouse)
+    public Shop(IWarehouse warehouse)
     {
         _warehouse = warehouse ?? throw new ArgumentNullException($"{nameof(warehouse)} is null");
     }
@@ -109,10 +126,10 @@ public class Shop
 
 public class Cart
 {
-    private Dictionary<Good, int> _cartSpace = new Dictionary<Good, int>();
-    private Warehouse _warehouse;
+    readonly private Dictionary<Good, int> _cartSpace = new Dictionary<Good, int>();
+    private IWarehouse _warehouse;
 
-    public Cart(Warehouse warehouse)
+    public Cart(IWarehouse warehouse)
     {
         _warehouse = warehouse ?? throw new ArgumentNullException($"{nameof(warehouse)} is null");
     }
@@ -125,7 +142,11 @@ public class Cart
         if (good == null)
             throw new ArgumentNullException($"{nameof(good)} is null");
 
-        if (_warehouse.HasEnough(good, ammount))
+        if (!_warehouse.HasEnough(good, ammount))
+        {
+            throw new ArgumentException($"Not enough {good.Name} in stock.");
+        }
+        else
         {
             if (_cartSpace.ContainsKey(good))
                 _cartSpace[good] += ammount;
@@ -133,10 +154,6 @@ public class Cart
                 _cartSpace.Add(good, ammount);
 
             _warehouse.Remove(good, ammount);
-        }
-        else
-        {
-            throw new ArgumentException($"Not enough {good.Name} in stock.");
         }
     }
 
@@ -152,17 +169,22 @@ public class Cart
 
     public Order Order()
     {
-        return new Order(_cartSpace);
+        Dictionary<Good, int> cartCopy = new Dictionary<Good, int>(_cartSpace);
+        return new Order(cartCopy);
     }
 }
 
 public class Order
 {
-    private Dictionary<Good, int> items;
+    readonly private Dictionary<Good, int> _items;
 
     public Order(Dictionary<Good, int> items)
     {
-        this.items = items;
+        if (items == null)
+            throw new ArgumentNullException($"{nameof(items)} is null");
+
+        _items = items;
     }
+
     public string Paylink => "Payment link generated";
 }
