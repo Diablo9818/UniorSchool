@@ -1,5 +1,3 @@
-using System.Linq;
-
 class Program
 {
     static void Main(string[] args)
@@ -65,7 +63,7 @@ public class Warehouse: IWarehouse
             throw new ArgumentNullException($"{nameof(good)} is null");
 
         if (!_storage.ContainsKey(good))
-            return;
+            throw new ArgumentException($"There is no {good} in the store.");
 
         if (_storage[good] > 0)
             _storage[good] -= amount;
@@ -84,6 +82,12 @@ public class Warehouse: IWarehouse
 
     public bool HasEnough(Good good, int quantity)
     {
+        if (good == null)
+            throw new ArgumentNullException($"{nameof(good)} is null");
+
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException($"{nameof(quantity)} can't be negative.");
+
         return _storage.ContainsKey(good) && _storage[good] >= quantity;
     }
 
@@ -138,9 +142,8 @@ public class Cart
         if (!_warehouse.HasEnough(good, ammount))
             throw new ArgumentException($"Not enough {good.Name} in stock.");
 
-      
-            if (!_cartSpace.ContainsKey(good))
-                _cartSpace[good] = 0;
+        if (!_cartSpace.ContainsKey(good))
+            _cartSpace[good] = 0;
 
         _cartSpace[good] += ammount;
 
@@ -157,8 +160,8 @@ public class Cart
     public Order Order()
     {
         RemoveGoods();
+
         return new Order(new Dictionary<Good, int>(_cartSpace));
-        
     }
 
     private void RemoveGoods()
