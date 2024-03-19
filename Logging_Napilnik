@@ -1,0 +1,85 @@
+namespace Lesson
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Pathfinder consolePathfinder = new Pathfinder(new ConsoleLogWritter());
+            Pathfinder filePathfinder = new Pathfinder(new FileLogWritter());
+            Pathfinder secureConsolePathfinder = new Pathfinder(new SecureConsoleLogWritter());
+            Pathfinder secureFilePathfinder = new Pathfinder(new SecureFileLogWritter());
+            Pathfinder secureConsoleFilePathfinder = new Pathfinder(new SecureConsoleLogFileWritter());
+        }
+    }
+
+    public class Pathfinder
+    {
+        private ILogger _logWritter;
+
+        public Pathfinder(ILogger consoleLogWritter)
+        {
+            _logWritter = consoleLogWritter ?? throw new ArgumentNullException($"{nameof(consoleLogWritter)} is null");
+        }
+
+        public void Find(string message)
+        {
+            _logWritter.WriteError(message);
+        }
+    }
+
+    public interface ILogger
+    {
+        void WriteError(string message);
+    }
+
+    public class ConsoleLogWritter: ILogger
+    {
+        public virtual void WriteError(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    public class FileLogWritter : ILogger
+    {
+        public virtual void WriteError(string message)
+        {
+            File.WriteAllText("log.txt", message);
+        }
+    }
+
+    public class SecureConsoleLogWritter : ConsoleLogWritter
+    {
+        public override void WriteError(string message)
+        {
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            {
+                base.WriteError(message);
+            }
+        }
+    }
+
+    public class SecureFileLogWritter : ConsoleLogWritter
+    {
+        public override void WriteError(string message)
+        {
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            {
+                File.WriteAllText("log.txt", message);
+            }
+        }
+    }
+
+    public class SecureConsoleLogFileWritter : ConsoleLogWritter
+    {
+        public override void WriteError(string message)
+        {
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            {
+                File.WriteAllText("log.txt", message);
+            }
+
+            base.WriteError(message);
+        }
+    }
+}
