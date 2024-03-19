@@ -1,3 +1,4 @@
+using System.Linq;
 
 class Program
 {
@@ -36,8 +37,6 @@ public interface IWarehouse
 {
     void Remove(Good good, int amount);
     bool HasEnough(Good good, int quantity);
-    void Delive(Good good, int amount);
-    void PrintGoods();
 }
 
 public class Good
@@ -49,6 +48,7 @@ public class Good
 
         Name = name;
     }
+
     public string Name { get; }
 }
 
@@ -64,13 +64,13 @@ public class Warehouse: IWarehouse
         if (good == null)
             throw new ArgumentNullException($"{nameof(good)} is null");
 
-        if (_storage.ContainsKey(good))
-        {
+        if (!_storage.ContainsKey(good))
+            return;
+
+        if (_storage[good] > 0)
             _storage[good] -= amount;
 
-            if (_storage[good] <= 0)
-                _storage.Remove(good);
-        }
+        _storage.Remove(good);
     }
 
     public void PrintGoods()
@@ -78,9 +78,7 @@ public class Warehouse: IWarehouse
         Console.WriteLine("This Warehouse has:");
 
         foreach (var item in _storage)
-        {
             Console.WriteLine($"{item.Key.Name}: {item.Value}");
-        }
     }
 
 
@@ -97,20 +95,16 @@ public class Warehouse: IWarehouse
         if (good == null)
             throw new ArgumentNullException($"{nameof(good)} is null");
 
-        if (_storage.ContainsKey(good))
-        {
-            _storage[good] += amount;
-        }
-        else
-        {
-            _storage.Add(good, amount);
-        }
+        if (!_storage.ContainsKey(good))
+            _storage[good] = 0;
+
+        _storage[good] += amount;
     }
 }
 
 public class Shop
 {
-    private Warehouse _warehouse;
+    private readonly Warehouse _warehouse;
 
     public Shop(Warehouse warehouse)
     {
@@ -142,18 +136,14 @@ public class Cart
             throw new ArgumentNullException($"{nameof(good)} is null");
 
         if (!_warehouse.HasEnough(good, ammount))
-        {
             throw new ArgumentException($"Not enough {good.Name} in stock.");
-        }
-        else
-        {
-            if (_cartSpace.ContainsKey(good))
-                _cartSpace[good] += ammount;
-            else
-                _cartSpace.Add(good, ammount);
 
-            _warehouse.Remove(good, ammount);
-        }
+      
+            if (!_cartSpace.ContainsKey(good))
+                _cartSpace[good] = 0;
+
+        _cartSpace[good] += ammount;
+
     }
 
     public void PrintGoods()
@@ -161,33 +151,26 @@ public class Cart
         Console.WriteLine("This Cart has:");
 
         foreach (var item in _cartSpace)
-        {
             Console.WriteLine($"{item.Key.Name}: {item.Value}");
-        }
     }
 
     public Order Order()
     {
         RemoveGoods();
-        Dictionary<Good, int> cartCopy = new Dictionary<Good, int>(_cartSpace);
-        return new Order(cartCopy);
+        return new Order(new Dictionary<Good, int>(_cartSpace));
+        
     }
 
     private void RemoveGoods()
     {
-        foreach (var item in _cartSpace)
+        foreach (var good in _cartSpace.Keys)
         {
-            Good good = item.Key;
-            int amount = item.Value;
+            int amount = _cartSpace[good];
 
             if (!_warehouse.HasEnough(good, amount))
-            {
                 throw new ArgumentException($"Not enough {good.Name} in stock.");
-            }
-            else
-            {
-                _warehouse.Remove(good, amount);
-            }
+            
+            _warehouse.Remove(good, amount);
         }
     }
 }
