@@ -42,8 +42,6 @@ public interface IWarehouse
 
 public class Good
 {
-    public string Name { get; }
-
     public Good(string name)
     {
         if (name == null)
@@ -51,23 +49,24 @@ public class Good
 
         Name = name;
     }
+    public string Name { get; }
 }
 
 public class Warehouse: IWarehouse
 {
-    readonly private Dictionary<Good, int> _storage = new Dictionary<Good, int>();
+    private readonly Dictionary<Good, int> _storage = new Dictionary<Good, int>();
 
-    public void Remove(Good good, int ammount)
+    public void Remove(Good good, int amount)
     {
-        if (ammount < 0)
-            throw new ArgumentOutOfRangeException($"{nameof(ammount)} can't be less than zero.");
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException($"{nameof(amount)} can't be less than zero.");
 
         if (good == null)
             throw new ArgumentNullException($"{nameof(good)} is null");
 
         if (_storage.ContainsKey(good))
         {
-            _storage[good] -= ammount;
+            _storage[good] -= amount;
 
             if (_storage[good] <= 0)
                 _storage.Remove(good);
@@ -111,9 +110,9 @@ public class Warehouse: IWarehouse
 
 public class Shop
 {
-    private IWarehouse _warehouse;
+    private Warehouse _warehouse;
 
-    public Shop(IWarehouse warehouse)
+    public Shop(Warehouse warehouse)
     {
         _warehouse = warehouse ?? throw new ArgumentNullException($"{nameof(warehouse)} is null");
     }
@@ -126,8 +125,8 @@ public class Shop
 
 public class Cart
 {
-    readonly private Dictionary<Good, int> _cartSpace = new Dictionary<Good, int>();
-    private IWarehouse _warehouse;
+    private readonly Dictionary<Good, int> _cartSpace = new Dictionary<Good, int>();
+    private readonly IWarehouse _warehouse;
 
     public Cart(IWarehouse warehouse)
     {
@@ -169,8 +168,27 @@ public class Cart
 
     public Order Order()
     {
+        RemoveGoods();
         Dictionary<Good, int> cartCopy = new Dictionary<Good, int>(_cartSpace);
         return new Order(cartCopy);
+    }
+
+    private void RemoveGoods()
+    {
+        foreach (var item in _cartSpace)
+        {
+            Good good = item.Key;
+            int amount = item.Value;
+
+            if (!_warehouse.HasEnough(good, amount))
+            {
+                throw new ArgumentException($"Not enough {good.Name} in stock.");
+            }
+            else
+            {
+                _warehouse.Remove(good, amount);
+            }
+        }
     }
 }
 
