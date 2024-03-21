@@ -4,11 +4,14 @@ namespace Lesson
     {
         static void Main(string[] args)
         {
-            Pathfinder consolePathfinder = new Pathfinder(new ConsoleLogWritter());
-            Pathfinder filePathfinder = new Pathfinder(new FileLogWritter());
-            Pathfinder secureConsolePathfinder = new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday));
-            Pathfinder secureFilePathfinder = new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday));
-            Pathfinder secureConsoleFilePathfinder = new Pathfinder(new SecureFridayLogWritter(new ILogWriter[2] { new ConsoleLogWritter(), new FileLogWritter() }, DayOfWeek.Friday));
+            Pathfinder[] pathfinders = new Pathfinder[] {
+                new Pathfinder(new ConsoleLogWritter()),
+                new Pathfinder(new FileLogWritter()),
+                new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday)),
+                new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday)),
+                new Pathfinder(new SecureFridayLogWritter(new ILogWriter[] { new ConsoleLogWritter(), 
+                    new FileLogWritter() }, DayOfWeek.Friday))
+            };
         }
     }
 
@@ -70,7 +73,7 @@ namespace Lesson
 
     public class SecureFridayLogWritter : ILogWriter
     {
-        private readonly ILogWriter[] _loggers = new ILogWriter[2];
+        private readonly ILogWriter[] _loggers;
         private readonly DayOfWeek _dayOfWeek;
 
         public SecureFridayLogWritter(ILogWriter[] loggers, DayOfWeek dayOfWeek)
@@ -81,12 +84,10 @@ namespace Lesson
 
         public void WriteError(string message)
         {
-            if (DateTime.Now.DayOfWeek == _dayOfWeek)
+            foreach (var logger in _loggers)
             {
-                _loggers[0].WriteError(message);
+                logger.WriteError(message);
             }
-
-            _loggers[1].WriteError(message);
         }
     }
 }
