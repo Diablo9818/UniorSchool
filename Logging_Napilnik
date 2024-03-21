@@ -74,12 +74,10 @@ namespace Lesson
     public class SecureFridayLogWritter : ILogWriter
     {
         private readonly ILogWriter[] _loggers;
-        private readonly DayOfWeek _dayOfWeek;
 
         public SecureFridayLogWritter(ILogWriter[] loggers, DayOfWeek dayOfWeek)
         {
             _loggers = loggers ?? throw new ArgumentNullException($"{nameof(loggers)} is null");
-            _dayOfWeek = dayOfWeek;
         }
 
         public void WriteError(string message)
