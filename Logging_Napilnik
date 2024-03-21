@@ -10,7 +10,7 @@ namespace Lesson
                 new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday)),
                 new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday)),
                 new Pathfinder(new SecureFridayLogWritter(new ILogWriter[] { new ConsoleLogWritter(), 
-                    new FileLogWritter() }, DayOfWeek.Friday))
+                    new FileLogWritter() })
             };
         }
     }
@@ -75,7 +75,7 @@ namespace Lesson
     {
         private readonly ILogWriter[] _loggers;
 
-        public SecureFridayLogWritter(ILogWriter[] loggers, DayOfWeek dayOfWeek)
+        public SecureFridayLogWritter(ILogWriter[] loggers)
         {
             _loggers = loggers ?? throw new ArgumentNullException($"{nameof(loggers)} is null");
         }
