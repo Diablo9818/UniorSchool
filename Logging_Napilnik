@@ -6,17 +6,17 @@ namespace Lesson
         {
             Pathfinder consolePathfinder = new Pathfinder(new ConsoleLogWritter());
             Pathfinder filePathfinder = new Pathfinder(new FileLogWritter());
-            Pathfinder secureConsolePathfinder = new Pathfinder(new SecureConsoleLogWritter());
-            Pathfinder secureFilePathfinder = new Pathfinder(new SecureFileLogWritter());
-            Pathfinder secureConsoleFilePathfinder = new Pathfinder(new SecureConsoleLogFileWritter());
+            Pathfinder secureConsolePathfinder = new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday));
+            Pathfinder secureFilePathfinder = new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday));
+            Pathfinder secureConsoleFilePathfinder = new Pathfinder(new SecureFridayLogWritter(new ILogWriter[2] { new ConsoleLogWritter(), new FileLogWritter() }, DayOfWeek.Friday));
         }
     }
 
     public class Pathfinder
     {
-        private ILogger _logWritter;
+        private ILogWriter _logWritter;
 
-        public Pathfinder(ILogger consoleLogWritter)
+        public Pathfinder(ILogWriter consoleLogWritter)
         {
             _logWritter = consoleLogWritter ?? throw new ArgumentNullException($"{nameof(consoleLogWritter)} is null");
         }
@@ -27,59 +27,66 @@ namespace Lesson
         }
     }
 
-    public interface ILogger
+    public interface ILogWriter
     {
         void WriteError(string message);
     }
 
-    public class ConsoleLogWritter: ILogger
+    public class ConsoleLogWritter: ILogWriter
     {
-        public virtual void WriteError(string message)
+        public  void WriteError(string message)
         {
             Console.WriteLine(message);
         }
     }
 
-    public class FileLogWritter : ILogger
+    public class FileLogWritter : ILogWriter
     {
-        public virtual void WriteError(string message)
+        public void WriteError(string message)
         {
             File.WriteAllText("log.txt", message);
         }
     }
 
-    public class SecureConsoleLogWritter : ConsoleLogWritter
+    public class FridayLogWritter : ILogWriter
     {
-        public override void WriteError(string message)
+        private readonly ILogWriter _logger;
+        private readonly DayOfWeek _dayOfWeek;
+
+        public FridayLogWritter(ILogWriter logger, DayOfWeek dayOfWeek)
         {
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            _logger = logger ?? throw new ArgumentNullException($"{nameof(logger)} is null");
+            _dayOfWeek = dayOfWeek;
+        }
+
+        public void WriteError(string message)
+        {
+            if (DateTime.Now.DayOfWeek == _dayOfWeek)
             {
-                base.WriteError(message);
+                _logger.WriteError(message);
             }
         }
     }
 
-    public class SecureFileLogWritter : ConsoleLogWritter
+    public class SecureFridayLogWritter : ILogWriter
     {
-        public override void WriteError(string message)
+        private readonly ILogWriter[] _loggers = new ILogWriter[2];
+        private readonly DayOfWeek _dayOfWeek;
+
+        public SecureFridayLogWritter(ILogWriter[] loggers, DayOfWeek dayOfWeek)
         {
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
-            {
-                File.WriteAllText("log.txt", message);
-            }
+            _loggers = loggers ?? throw new ArgumentNullException($"{nameof(loggers)} is null");
+            _dayOfWeek = dayOfWeek;
         }
-    }
 
-    public class SecureConsoleLogFileWritter : ConsoleLogWritter
-    {
-        public override void WriteError(string message)
+        public void WriteError(string message)
         {
-            if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            if (DateTime.Now.DayOfWeek == _dayOfWeek)
             {
-                File.WriteAllText("log.txt", message);
+                _loggers[0].WriteError(message);
             }
 
-            base.WriteError(message);
+            _loggers[1].WriteError(message);
         }
     }
 }
