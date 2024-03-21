@@ -10,7 +10,7 @@ namespace Lesson
                 new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday)),
                 new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday)),
                 new Pathfinder(new SecureFridayLogWritter(new ILogWriter[] { new ConsoleLogWritter(), 
-                    new FileLogWritter() })
+                    new FileLogWritter() }))
             };
         }
     }
