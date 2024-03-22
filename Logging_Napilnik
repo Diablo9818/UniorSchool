@@ -7,9 +7,9 @@ namespace Lesson
             Pathfinder[] pathfinders = new Pathfinder[] {
                 new Pathfinder(new ConsoleLogWritter()),
                 new Pathfinder(new FileLogWritter()),
-                new Pathfinder(new FridayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday)),
-                new Pathfinder(new FridayLogWritter(new FileLogWritter(), DayOfWeek.Friday)),
-                new Pathfinder(new SecureFridayLogWritter(new ILogWriter[] { new ConsoleLogWritter(), 
+                new Pathfinder(new DayLogWritter(new ConsoleLogWritter(), DayOfWeek.Friday)),
+                new Pathfinder(new DayLogWritter(new FileLogWritter(), DayOfWeek.Friday)),
+                new Pathfinder(new LogsWritter(new ILogWriter[] { new ConsoleLogWritter(),
                     new FileLogWritter() }))
             };
         }
@@ -19,9 +19,9 @@ namespace Lesson
     {
         private ILogWriter _logWritter;
 
-        public Pathfinder(ILogWriter consoleLogWritter)
+        public Pathfinder(ILogWriter logWritter)
         {
-            _logWritter = consoleLogWritter ?? throw new ArgumentNullException($"{nameof(consoleLogWritter)} is null");
+            _logWritter = logWritter ?? throw new ArgumentNullException($"{nameof(logWritter)} is null");
         }
 
         public void Find(string message)
@@ -51,12 +51,12 @@ namespace Lesson
         }
     }
 
-    public class FridayLogWritter : ILogWriter
+    public class DayLogWritter : ILogWriter
     {
         private readonly ILogWriter _logger;
         private readonly DayOfWeek _dayOfWeek;
 
-        public FridayLogWritter(ILogWriter logger, DayOfWeek dayOfWeek)
+        public DayLogWritter(ILogWriter logger, DayOfWeek dayOfWeek)
         {
             _logger = logger ?? throw new ArgumentNullException($"{nameof(logger)} is null");
             _dayOfWeek = dayOfWeek;
@@ -71,11 +71,11 @@ namespace Lesson
         }
     }
 
-    public class SecureFridayLogWritter : ILogWriter
+    public class LogsWritter : ILogWriter
     {
         private readonly ILogWriter[] _loggers;
 
-        public SecureFridayLogWritter(ILogWriter[] loggers)
+        public LogsWritter(ILogWriter[] loggers)
         {
             _loggers = loggers ?? throw new ArgumentNullException($"{nameof(loggers)} is null");
         }
