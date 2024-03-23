@@ -1,0 +1,137 @@
+using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography;
+using System.Text;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Order order = new Order(13555565, 4);
+
+        FirstPaymentSystem firstPaymentSystem = new FirstPaymentSystem(new MD5Hasher());
+        SecondPaymentSystem secondPaymentSystem = new SecondPaymentSystem(new MD5Hasher());
+        ThirdPaymentSystem thirdPaymentSystem = new ThirdPaymentSystem(new SHA1Hasher());
+
+        Console.WriteLine(firstPaymentSystem.GetPayingLink(order));
+        Console.WriteLine(secondPaymentSystem.GetPayingLink(order));
+        Console.WriteLine(thirdPaymentSystem.GetPayingLink(order));
+        //Выведите платёжные ссылки для трёх разных систем платежа: 
+        //pay.system1.ru/order?amount=12000RUB&hash={MD5 хеш ID заказа}
+        //order.system2.ru/pay?hash={MD5 хеш ID заказа + сумма заказа}
+        //system3.com/pay?amount=12000&curency=RUB&hash={SHA-1 хеш сумма заказа + ID заказа + секретный ключ от системы}
+    }
+}
+
+public interface IPaymentSystem
+{
+    public string GetPayingLink(Order order);
+}
+
+public interface IHasher
+{
+    public string GetHash(string input);
+}
+
+public class Order
+{
+    private readonly int _id;
+    private readonly int _amount;
+
+    public Order(int id, int amount)
+    {
+        _id = id;
+
+        if (amount < 0)
+            throw new ArgumentOutOfRangeException($"ammount can't be less than 0");
+
+        _amount = amount;
+    }
+
+    public string GetID()
+    {
+        return _id.ToString();
+    }
+
+    public string GetAmount()
+    {
+        return _amount.ToString();
+    }
+}
+
+public class MD5Hasher: IHasher
+{
+    public string GetHash(string input)
+    {
+        var hash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(input));
+
+        return Convert.ToBase64String(hash);
+    }
+}
+
+public class SHA1Hasher : IHasher
+{
+    public string GetHash(string input)
+    {
+        var hash = SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(input));
+
+        return Convert.ToBase64String(hash);
+    }
+}
+
+public class FirstPaymentSystem : IPaymentSystem
+{
+    private IHasher _hasher;
+
+    public FirstPaymentSystem(IHasher hasher)
+    {
+        _hasher = hasher ?? throw new ArgumentNullException($"{nameof(hasher)} is null");
+    }
+
+    public string GetPayingLink(Order order)
+    {
+        if (order == null)
+            throw new ArgumentNullException($"{nameof(order)} is null");
+
+        return _hasher.GetHash(order.GetID());
+    }
+}
+
+public class SecondPaymentSystem : IPaymentSystem
+{
+    private IHasher _hasher;
+
+    public SecondPaymentSystem(IHasher hasher)
+    {
+        _hasher = hasher ?? throw new ArgumentNullException($"{nameof(hasher)} is null");
+    }
+
+    public  string GetPayingLink(Order order)
+    {
+        if (order == null)
+            throw new ArgumentNullException($"{nameof(order)} is null");
+
+        string orderInformation = order.GetID() + order.GetAmount();
+        return _hasher.GetHash(orderInformation);
+    }
+}
+
+public class ThirdPaymentSystem : IPaymentSystem
+{
+    private string _secretSystemKey = "PLS_Delete_your_System34_folder";
+    private IHasher _hasher;
+
+    public ThirdPaymentSystem(IHasher hasher)
+    {
+        _hasher = hasher ?? throw new ArgumentNullException($"{nameof(hasher)} is null");
+    }
+
+    public string GetPayingLink(Order order)
+    {
+        if (order == null)
+            throw new ArgumentNullException($"{nameof(order)} is null");
+
+        string orderInformation = order.GetID() + order.GetAmount() + _secretSystemKey;
+        return _hasher.GetHash(orderInformation);
+    }
+}
