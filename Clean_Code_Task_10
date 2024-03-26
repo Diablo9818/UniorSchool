@@ -1,0 +1,11 @@
+class Weapon
+{
+    private const int BulletsPerShot = 1;
+    private const int minBulletForShoot = 0;
+
+    private int _bullets;
+
+    public bool CanShoot() => _bullets > minBulletForShoot;
+
+    public void Shoot() => _bullets -= BulletsPerShot;
+}
