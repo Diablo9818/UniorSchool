@@ -1,0 +1,53 @@
+class Player
+{
+    public string Name { get; private set; }
+
+    public int Age { get; private set; }
+
+    public Weapon Weapon { get; private set; }
+
+    public Mover Mover { get; private set; }
+
+    public void Move()
+    {
+        Mover.Move();
+    }
+
+    public void Attack()
+    {
+        Weapon.Attack();
+    }
+}
+
+class Mover
+{
+    public float MovementDirectionX { get; private set; }
+
+    public float MovementDirectionY { get; private set; }
+
+    public float MovementSpeed { get; private set; }
+
+    public void Move()
+    {
+        //Do move
+    }
+}
+
+class Weapon
+{
+    public int WeaponDamage { get; private set; }
+
+    public float WeaponCooldown { get; private set; }
+
+    public void Attack()
+    {
+        //attack
+        if(IsReloading())
+            return;
+    }
+
+    public bool IsReloading()
+    {
+        throw new NotImplementedException();
+    }
+}
