@@ -1,5 +1,19 @@
 class Player
 {
+    public Player(string name, int age, Weapon weapon, Mover mover)
+    {
+        Name = name ?? throw new ArgumentNullException($"{nameof(name)} is null");
+
+        if (age < 0)
+        {
+            throw new ArgumentOutOfRangeException($"Cooldown can't be zero. Current  amount is {age}");
+        }
+
+        Age = age;
+        Weapon = weapon ?? throw new ArgumentNullException($"{nameof(weapon)} is null");
+        Mover = mover ?? throw new ArgumentNullException($"{nameof(mover)} is null");
+    }
+
     public string Name { get; private set; }
 
     public int Age { get; private set; }
@@ -21,11 +35,24 @@ class Player
 
 class Mover
 {
-    public float MovementDirectionX { get; private set; }
+    public Mover(float directionX, float directionY, float speed)
+    {
+        DirectionX = directionX;
+        DirectionY = directionY;
 
-    public float MovementDirectionY { get; private set; }
+        if (speed < 0)
+        {
+            throw new ArgumentOutOfRangeException($"Cooldown can't be zero. Current amount is {speed}");
+        }
 
-    public float MovementSpeed { get; private set; }
+        Speed = speed;
+    }
+
+    public float DirectionX { get; private set; }
+
+    public float DirectionY { get; private set; }
+
+    public float Speed { get; private set; }
 
     public void Move()
     {
@@ -35,9 +62,25 @@ class Mover
 
 class Weapon
 {
-    public int WeaponDamage { get; private set; }
+    public Weapon(int damage, float cooldown)
+    {
+        if (cooldown < 0)
+        {
+            throw new ArgumentOutOfRangeException($"Cooldown can't be zero. Current amount is {cooldown}");
+        }
 
-    public float WeaponCooldown { get; private set; }
+        if (damage < 0)
+        {
+            throw new ArgumentOutOfRangeException($"Cooldown can't be zero. Current amount is {damage}");
+        }
+
+        Damage = damage;
+        Cooldown = cooldown;
+    }
+
+    public int Damage { get; private set; }
+
+    public float Cooldown { get; private set; }
 
     public void Attack()
     {
