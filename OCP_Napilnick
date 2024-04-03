@@ -1,0 +1,82 @@
+using System;
+using System.Collections.Generic;
+
+namespace IMJunior
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var orderForm = new OrderForm();
+            var paymentHandler = new PaymentHandler();
+            var paymentFactory = new PaymentFactory();
+
+            var systemId = orderForm.ShowForm();
+            IPaymentSystem paymentSystem = paymentFactory.Create(systemId);
+
+            if (paymentSystem != null)
+            {
+                paymentSystem.ProcessPayment();
+                paymentHandler.ShowPaymentResult(paymentSystem);
+            }
+            else
+            {
+                Console.WriteLine("Выбранная платежная система не поддерживается.");
+            }
+        }
+    }
+
+    public interface IPaymentSystem
+    {
+        void ProcessPayment();
+       public string SystemId { get; }
+    }
+
+    public class PaymentSystem : IPaymentSystem
+    {
+        public PaymentSystem(string systemId)
+        {
+            SystemId = systemId ?? throw new ArgumentNullException($"Argument is null{systemId}!");
+        }
+
+        public void ProcessPayment()
+        {
+            Console.WriteLine($"Перевод на страницу {SystemId}...");
+            Console.WriteLine($"Проверка платежа через {SystemId}...");
+        }
+
+        public string SystemId { get; private set; }
+    }
+
+    public class PaymentFactory
+    {
+        public PaymentSystem Create(string systemID)
+        {
+            if (systemID == null)
+                throw new ArgumentNullException($"Can't create new Payment system because argument is null{systemID}!");
+
+            return new PaymentSystem(systemID);
+        }
+    }
+
+    public class OrderForm
+    {
+        public string ShowForm()
+        {
+            Console.WriteLine("Мы принимаем: QIWI, WebMoney, Card");
+
+            //симуляция веб интерфейса
+            Console.WriteLine("Какой системой вы хотите совершить оплату?");
+            return Console.ReadLine();
+        }
+    }
+
+    public class PaymentHandler
+    {
+        public void ShowPaymentResult(IPaymentSystem paymentSystem)
+        {
+            Console.WriteLine($"Вы оплатили с помощью {paymentSystem.SystemId}");
+            Console.WriteLine("Оплата прошла успешно!");
+        }
+    }
+}
