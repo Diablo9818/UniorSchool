@@ -7,75 +7,143 @@ namespace IMJunior
     {
         static void Main(string[] args)
         {
-            var orderForm = new OrderForm();
-            var paymentHandler = new PaymentHandler();
-            var paymentFactory = new PaymentFactory();
-
-            var systemId = orderForm.ShowForm();
-            IPaymentSystem paymentSystem = paymentFactory.Create(systemId);
-
-            if (paymentSystem != null)
+            var orderForm = new OrderForm(new Dictionary<string, IPaymentSystemFactory>()
             {
-                paymentSystem.ProcessPayment();
-                paymentHandler.ShowPaymentResult(paymentSystem);
-            }
-            else
-            {
-                Console.WriteLine("Выбранная платежная система не поддерживается.");
-            }
+                {"Qiwi", new QiwiPaymentFactory() },
+                { "WebMoney", new WebMoneyPaymentFactory()},
+                {"Card", new CardPaymentFactory() }
+            });
+
+            var paymentSystemFactory = orderForm.ShowForm();
+
+            var paymentHandler = new PaymentHandler(paymentSystemFactory);
+            paymentHandler.ProcessPayment();
+            paymentHandler.ShowPaymentResult();
         }
     }
 
     public interface IPaymentSystem
     {
-        void ProcessPayment();
        public string SystemId { get; }
+
+        public void ProcessPayment();
     }
 
-    public class PaymentSystem : IPaymentSystem
+    public interface IPaymentSystemFactory
     {
-        public PaymentSystem(string systemId)
-        {
-            SystemId = systemId ?? throw new ArgumentNullException($"Argument is null{systemId}!");
-        }
+        public IPaymentSystem Create();
+    }
+
+    public class QiwiPaymentSystem : IPaymentSystem
+    {
+        public string SystemId { get; private set; } = "QIWI";
 
         public void ProcessPayment()
         {
-            Console.WriteLine($"Перевод на страницу {SystemId}...");
-            Console.WriteLine($"Проверка платежа через {SystemId}...");
+            Console.WriteLine("Перевод на страницу QIWI...");
+            Console.WriteLine("Проверка платежа через QIWI...");
         }
-
-        public string SystemId { get; private set; }
     }
 
-    public class PaymentFactory
+    public class WebMoneyPaymentSystem : IPaymentSystem
     {
-        public PaymentSystem Create(string systemID)
-        {
-            if (systemID == null)
-                throw new ArgumentNullException($"Can't create new Payment system because argument is null{systemID}!");
+        public string SystemId { get; private set; } = "WebMoney";
 
-            return new PaymentSystem(systemID);
+        public void ProcessPayment()
+        {
+            Console.WriteLine("Вызов API WebMoney...");
+            Console.WriteLine("Проверка платежа через WebMoney...");
+        }
+    }
+
+    public class CardPaymentSystem : IPaymentSystem
+    {
+        public string SystemId { get; private set; } = "Card";
+
+        public void ProcessPayment()
+        {
+            Console.WriteLine("Вызов API банка эмитера карты Card...");
+            Console.WriteLine("Проверка платежа через Card...");
+        }
+    }
+
+    public class QiwiPaymentFactory: IPaymentSystemFactory
+    {
+        public IPaymentSystem Create()
+        {
+            return new QiwiPaymentSystem();
+        }
+    }
+
+    public class WebMoneyPaymentFactory : IPaymentSystemFactory
+    {
+        public IPaymentSystem Create()
+        {
+            return new WebMoneyPaymentSystem();
+        }
+    }
+
+    public class CardPaymentFactory : IPaymentSystemFactory
+    {
+        public IPaymentSystem Create()
+        {
+            return new CardPaymentSystem();
         }
     }
 
     public class OrderForm
     {
-        public string ShowForm()
-        {
-            Console.WriteLine("Мы принимаем: QIWI, WebMoney, Card");
+        private readonly IReadOnlyDictionary<string, IPaymentSystemFactory> _paymentSystemFactories;
 
-            //симуляция веб интерфейса
-            Console.WriteLine("Какой системой вы хотите совершить оплату?");
-            return Console.ReadLine();
+        public OrderForm(IReadOnlyDictionary<string, IPaymentSystemFactory> paymentSystemFactories)
+        {
+            _paymentSystemFactories = paymentSystemFactories;
+        }
+
+        public IPaymentSystemFactory ShowForm()
+        {
+            Console.WriteLine($"Мы принимаем:{string.Join(", ", _paymentSystemFactories.Keys)}");
+
+            IPaymentSystemFactory paymentSystemFactory = null;
+
+            do
+            {
+                //симуляция веб интерфейса
+                Console.WriteLine("Какой системой вы хотите совершить оплату?");
+                var systemId = Console.ReadLine();
+
+                if (_paymentSystemFactories.ContainsKey(systemId))
+                {
+                    paymentSystemFactory = _paymentSystemFactories[systemId];
+                }
+                else
+                {
+                    Console.WriteLine("Выбранная платежная система не поддерживается. Пожалуйста, выберите из предложенных.");
+                }
+            }
+            while (paymentSystemFactory == null);
+
+            return paymentSystemFactory;
         }
     }
 
     public class PaymentHandler
     {
-        public void ShowPaymentResult(IPaymentSystem paymentSystem)
+        private IPaymentSystem _paymentSystem;
+
+        public PaymentHandler(IPaymentSystemFactory paymentSystemFactory)
         {
-            Console.WriteLine($"Вы оплатили с помощью {paymentSystem.SystemId}");
+            _paymentSystem = paymentSystemFactory?.Create() ?? throw new InvalidCastException();
+        }
+
+        public void ProcessPayment()
+        {
+            _paymentSystem.ProcessPayment();
+        }
+
+        public void ShowPaymentResult()
+        {
+            Console.WriteLine($"Вы оплатили с помощью {_paymentSystem.SystemId}");
             Console.WriteLine("Оплата прошла успешно!");
         }
     }
