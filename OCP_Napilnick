@@ -24,7 +24,7 @@ namespace IMJunior
 
     public interface IPaymentSystem
     {
-       public string SystemId { get; }
+       public string Id { get; }
 
         public void ProcessPayment();
     }
@@ -36,7 +36,7 @@ namespace IMJunior
 
     public class QiwiPaymentSystem : IPaymentSystem
     {
-        public string SystemId { get; private set; } = "QIWI";
+        public string Id { get;} = "QIWI";
 
         public void ProcessPayment()
         {
@@ -47,7 +47,7 @@ namespace IMJunior
 
     public class WebMoneyPaymentSystem : IPaymentSystem
     {
-        public string SystemId { get; private set; } = "WebMoney";
+        public string Id { get; } = "WebMoney";
 
         public void ProcessPayment()
         {
@@ -58,7 +58,7 @@ namespace IMJunior
 
     public class CardPaymentSystem : IPaymentSystem
     {
-        public string SystemId { get; private set; } = "Card";
+        public string Id { get;} = "Card";
 
         public void ProcessPayment()
         {
